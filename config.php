@@ -5,7 +5,7 @@ return [
      'token' => "1502800754:AAGib9lzSZx415GYJwE3j0PjKDTCCNzPTtU",
      'db' => [
          'host' => 'localhost',
-         'dbname' => 'fd',
+         'dbname' => 'olx',
          'user' => 'fd',
          'password' => 'fd'
      ],
