@@ -8,9 +8,9 @@ class Localbase
      public $user;
      private $db_lang = 'mysql';
      private $db_host = 'localhost';
-     private $dbname = 'olx-telegram';
-     private $db_username = 'olx-telegram';
-     private $db_password = 'hU4tE1dY9y';
+     private $dbname = 'ziyodullo_olxbot';
+     private $db_username = 'ziyodullo_olxbot';
+     private $db_password = 'j^tpMx)G9[/A@I#;';
      function __construct($chat_id)
      {
           $this->chat_id = $chat_id;
