@@ -72,7 +72,7 @@
       <workItem from="1693928617416" duration="33000" />
       <workItem from="1693936733119" duration="803000" />
       <workItem from="1693975426093" duration="22000" />
-      <workItem from="1693975674127" duration="803000" />
+      <workItem from="1693975674127" duration="1278000" />
     </task>
     <servers />
   </component>
@@ -84,7 +84,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="php">
           <url>file://$PROJECT_DIR$/hook.php</url>
-          <line>376</line>
+          <line>379</line>
           <option name="timeStamp" value="2" />
         </line-breakpoint>
       </breakpoints>

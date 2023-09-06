@@ -80,7 +80,6 @@ class Profile
      public function change_lang($lang)
      {
           $this->db->update_user(['lang' => $lang, 'step' => "menu"]);
-          $this->tg->send_message("Til muvaffaqiyatli o'zgartirildi");
      }
 
      public function lang_keyboard ()
