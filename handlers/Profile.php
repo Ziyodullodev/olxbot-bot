@@ -65,10 +65,10 @@ class Profile
 
     function choice_region_redirect_menu($region_id)
     {
-        $menus = $this->db->get_menu();
+        $menus = $this->db->get_menu($this->db->user['lang']);
         $menu = [];
         foreach ($menus as $key => $value) {
-            $menu[] = [$value['name_' . $this->db->user['lang']]];
+            $menu[] = [$value['name']];
         }
         $this->tg->delete_message()
             ->set_replyKeyboard($menu)
