@@ -32,7 +32,7 @@ class Profile
             $this->db->update_user(['step' => $step]);
             $text = $this->db->get_text("choice_city", $this->db->user['lang']);
             if ($edit) {
-                $this->tg->edit_message($text, $this->tg->get_webhookUpdates()['callback_query']['message']['message_id']+1);
+                $this->tg->edit_message($text, $this->tg->get_webhookUpdates()['message']['message_id']+1);
             } else {
                 $this->tg->send_message($text);
             }
