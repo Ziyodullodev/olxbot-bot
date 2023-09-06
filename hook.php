@@ -347,12 +347,6 @@ if (!empty($updates)) {
         } elseif ($step == "choice_region") {
             # viloyat capital
             $profile->choice_region_redirect_menu($data);
-            // $product = $db->get_product($data);
-            // $user_id = $product['user_id'];
-            // $user_chat_id = $db->get_user_chat_id($user_id);
-            $tg->delete_message()
-            ->set_replyKeyboard($main_menu)
-            ->send_message($db->get_text('menu_text', $lang));
 
         } elseif ($data == "phone_number") {
             $tg->delete_message()
