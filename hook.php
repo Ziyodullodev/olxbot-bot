@@ -160,6 +160,7 @@ if (!empty($updates)) {
             $tg->set_replyKeyboard($main_menu)
                 ->send_message($db->get_text('change_lang_success', $lang));
             exit();
+
         }
         if ($text == "/start" and $step != "start") {
 
