@@ -31,8 +31,8 @@ if (!empty($updates)) {
         $profile->choice_city($name, true);
         exit();
     }
-    $tg->send_message("test");
-    exit();
+//    $tg->send_message("test");
+//    exit();
     $step = $user_profile['step'];
     $lang = 'uz';
     $menus = $db->get_menu($lang);
