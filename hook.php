@@ -201,7 +201,9 @@ if (!empty($updates)) {
             } elseif ($get_command['command'] == "change_lang") {
                 $profile->lang_keyboard();
             } elseif ($get_command['command'] == "change_location") {
-                $profile->choice_city($name);
+                $tg->set_replyKeyboard([], true)
+                    ->send_message("Qaysi viloyatdansiz?");
+                $profile->choice_city($name, false, true);
             } elseif ($get_command['command'] == "edit_profile") {
                 $tg->send_message("profileni tahrirlash");
             } elseif ($get_command['command'] == "back_button") {
@@ -345,10 +347,12 @@ if (!empty($updates)) {
         } elseif ($step == "choice_region") {
             # viloyat capital
             $profile->choice_region_redirect_menu($data);
-            $product = $db->get_product($data);
-            $user_id = $product['user_id'];
-            $user_chat_id = $db->get_user_chat_id($user_id);
-            $tg->send_message("test", $user_chat_id);
+            // $product = $db->get_product($data);
+            // $user_id = $product['user_id'];
+            // $user_chat_id = $db->get_user_chat_id($user_id);
+            $tg->delete_message()
+            ->set_replyKeyboard($main_menu)
+            ->send_message($db->get_text('menu_text', $lang));
 
         } elseif ($data == "phone_number") {
             $tg->delete_message()

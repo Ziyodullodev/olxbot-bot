@@ -15,7 +15,7 @@ class Profile
     }
 
 
-    function choice_city($name, $action = false)
+    function choice_city($name, $action = false, $edit = false)
     {
         $i = 0;
         $c = 2;
@@ -28,9 +28,14 @@ class Profile
         $this->tg->set_inlineKeyboard($keys);
 
         if (!$action) {
+            
             $this->db->update_user(['step' => $step]);
             $text = $this->db->get_text("choice_city", $this->db->user['lang']);
-            $this->tg->send_message($text);
+            if ($edit) {
+                $this->tg->edit_message($text);
+            } else {
+                $this->tg->send_message($text);
+            }
         } else {
             $user_id = $this->db->create_user($name, $step, $this->chat_id);
             $this->db->create_user_location($user_id);
