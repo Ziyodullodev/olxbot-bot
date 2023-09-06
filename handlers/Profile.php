@@ -30,7 +30,7 @@ class Profile
         if (!$action) {
             
             $this->db->update_user(['step' => $step]);
-            $text = $this->db->get_text("choice_city", $this->db->user['lang']);
+            $text = $this->db->get_text("choice_city", $this->db->user['lang']) . $this->tg->get_webhookUpdates()['message']['message_id'];
             if ($edit) {
                 $this->tg->edit_message($text, $this->tg->get_webhookUpdates()['message']['message_id']+2);
             } else {
