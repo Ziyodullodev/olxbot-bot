@@ -6,6 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="22a1f6f8-3249-4da2-991a-e6d601342dbc" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/handlers/Profile.php" beforeDir="false" afterPath="$PROJECT_DIR$/handlers/Profile.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/hook.php" beforeDir="false" afterPath="$PROJECT_DIR$/hook.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -69,10 +71,23 @@
       <workItem from="1693919089855" duration="548000" />
       <workItem from="1693928617416" duration="33000" />
       <workItem from="1693936733119" duration="803000" />
+      <workItem from="1693975426093" duration="22000" />
+      <workItem from="1693975674127" duration="803000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="php">
+          <url>file://$PROJECT_DIR$/hook.php</url>
+          <line>376</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

@@ -143,6 +143,13 @@ if (!empty($updates)) {
             exit();
 
         }
+        elseif ($step == "lang"){
+            if ($text == "🇺🇿 O'zbekcha"){
+                $profile->change_lang('uz');
+            }elseif ($text == "🇷🇺 Русский"){
+                $profile->change_lang('ru');
+            }
+        }
         if ($text == "/start" and $step != "start") {
 
             $tg->set_replyKeyboard($main_menu)
@@ -185,6 +192,8 @@ if (!empty($updates)) {
                     $db->update_user(['step' => 'phone_number']);
                     exit();
                 }
+            } elseif ($get_command['command'] == "change_lang") {
+                $profile->lang_keyboard();
             }
         } else {
             $tg->set_replyKeyboard($main_menu)

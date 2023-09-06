@@ -76,4 +76,19 @@ class Profile
           $phone_number = $user['phone_number'] ?? "Telefon raqam kiritilmagan";
           $this->tg->send_message("Sizning profiliz:\n\nIsm: {$user['name']}\nViloyat: {$location['city_name']}\nTuman: {$location['region_name']}\nTelefon raqam: {$phone_number}");
      }
+
+     public function change_lang($lang)
+     {
+          $this->db->update_user(['lang' => $lang, 'step' => "menu"]);
+          $this->tg->send_message("Til muvaffaqiyatli o'zgartirildi");
+     }
+
+     public function lang_keyboard ()
+     {
+         $this->db->update_user(['step' => "lang"]);
+          $this->tg->set_replyKeyboard([['🇺🇿 O\'zbekcha', '🇷🇺 Русский']])
+               ->send_message("Tilni tanlang\nВыберите язык");
+     }
+
+
 }
