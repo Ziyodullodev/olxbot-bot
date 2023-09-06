@@ -34,7 +34,7 @@ if (!empty($updates)) {
 //    $tg->send_message("test");
 //    exit();
     $step = $user_profile['step'];
-    $lang = 'uz';
+    $lang = $user_profile['lang'];
     $menus = $db->get_menu($lang);
     foreach ($menus as $menu) {
         $main_menu[] = [$menu['name']];
