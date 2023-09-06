@@ -146,8 +146,16 @@ if (!empty($updates)) {
         elseif ($step == "lang"){
             if ($text == "🇺🇿 O'zbekcha"){
                 $profile->change_lang('uz');
+                $lang = "uz";
             }elseif ($text == "🇷🇺 Русский"){
                 $profile->change_lang('ru');
+                $lang = "ru";
+            }
+
+            $menus = $db->get_menu($lang);
+            $main_menu = [];
+            foreach ($menus as $menu) {
+                $main_menu[] = [$menu['name']];
             }
             $tg->set_replyKeyboard($main_menu)
                 ->send_message($db->get_text('change_lang_success', $lang));
