@@ -68,6 +68,7 @@ class Profile
         $this->db->update_user_location(['region_id' => $region_id]);
     }
 
+    
     public function show_profile()
     {
         $user = $this->db->user;

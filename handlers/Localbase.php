@@ -145,7 +145,7 @@ class Localbase
 
     public function get_command_by_menu_name($menu_name, $lang)
     {
-        $stmt = $this->db->query("SELECT command FROM `menu` WHERE `name_{$lang}` = '{$menu_name}'");
+        $stmt = $this->db->query("SELECT command FROM `menu` WHERE `name_{$lang}` = '{$menu_name}' and `type` != 'text'");
         $data = $stmt->fetch(PDO::FETCH_ASSOC);
         return $data;
     }
