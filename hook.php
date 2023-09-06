@@ -142,12 +142,11 @@ if (!empty($updates)) {
             $db->update_user(['step' => 'manu']);
             exit();
 
-        }
-        elseif ($step == "lang"){
-            if ($text == "🇺🇿 O'zbekcha"){
+        } elseif ($step == "lang") {
+            if ($text == "🇺🇿 O'zbekcha") {
                 $profile->change_lang('uz');
                 $lang = "uz";
-            }elseif ($text == "🇷🇺 Русский"){
+            } elseif ($text == "🇷🇺 Русский") {
                 $profile->change_lang('ru');
                 $lang = "ru";
             }
