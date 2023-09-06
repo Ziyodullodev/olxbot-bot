@@ -8,6 +8,7 @@ require_once "components/menus.php";
 require_once 'lang/i18n.class.php';
 
 $tg = new Telegram(['token' => $config['token']]);
+//$tg->set_webhook("https://bot.hehe.uz/olxbot-bot/hook.php");
 $updates = $tg->get_webhookUpdates();
 if (!empty($updates)) {
 
@@ -31,8 +32,8 @@ if (!empty($updates)) {
         $profile->choice_city($name, true);
         exit();
     }
-//    $tg->send_message("test");
-//    exit();
+    //$tg->send_message("test rejimda fd");
+    //exit();
     $step = $user_profile['step'];
     $lang = $user_profile['lang'];
     $menus = $db->get_menu($lang);

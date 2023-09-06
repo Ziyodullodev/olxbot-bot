@@ -85,7 +85,7 @@ class Profile
     public function lang_keyboard()
     {
         $this->db->update_user(['step' => "lang"]);
-        $this->tg->set_replyKeyboard([['🇺🇿 O\'zbekcha', '🇷🇺 Русский']])
+        $this->tg->set_replyKeyboard([['🇺🇿 O\'zbekcha'], ['🇷🇺 Русский']])
             ->send_message("Tilni tanlang\nВыберите язык");
     }
 

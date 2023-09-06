@@ -2,7 +2,7 @@
 
 
 return [
-    'token' => "1502800754:AAGib9lzSZx415GYJwE3j0PjKDTCCNzPTtU",
+    'token' => "6570547353:AAHaA8udxtYTWIJG3rvFLfCxmYrk6HKy_9s",
     'db' => [
         'host' => 'localhost',
         'dbname' => 'olx',
