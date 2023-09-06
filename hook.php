@@ -32,8 +32,9 @@ if (!empty($updates)) {
         $profile->choice_city($name, true);
         exit();
     }
-    //$tg->send_message("test rejimda fd");
-    //exit();
+    $tg->send_photo("AgACAgIAAxkBAAIosGTthCm57HVJ6lLHDYPkTbctKNxGAAKN0TEbcLBoS7hu87nsvqJtAQADAgADeAADMAQ");
+    $tg->send_message("test rejimda fd");
+    exit();
     $step = $user_profile['step'];
     $lang = $user_profile['lang'];
     $menus = $db->get_menu($lang);
