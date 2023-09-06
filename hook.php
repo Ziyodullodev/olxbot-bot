@@ -202,6 +202,13 @@ if (!empty($updates)) {
                 }
             } elseif ($get_command['command'] == "change_lang") {
                 $profile->lang_keyboard();
+            } elseif ($get_command['command'] == "change_location") {
+                $tg->send_message("manzilni almashtirish");
+            } elseif ($get_command['command'] == "edit_profile") {
+                $tg->send_message("profileni tahrirlash");
+            } elseif ($get_command['command'] == "back_button") {
+                    $tg->set_replyKeyboard($main_menu)
+                    ->send_message($db->get_text('menu_text', $lang));
             }
         } else {
             $tg->set_replyKeyboard($main_menu)
