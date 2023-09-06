@@ -25,14 +25,18 @@ class Profile
             $keys[floor($i / $c)][$i % $c] = ['text' => $value['name'], 'callback_data' => $value['id']];
             $i++;
         }
-        $this->tg->set_inlineKeyboard($keys)
-            ->send_message("Assalomu alaykum, $name\ntuda suda karochi\n\nQaysi viloyatdansiz?");
+        $this->tg->set_inlineKeyboard($keys);
 
         if (!$action) {
             $this->db->update_user(['step' => $step]);
+            $text = $this->db->get_text("choice_city", $this->db->user['lang']);
+            $this->tg->send_message($text);
         } else {
             $user_id = $this->db->create_user($name, $step, $this->chat_id);
             $this->db->create_user_location($user_id);
+            $text = $this->db->get_text("start_text", 'uz');
+            $text = str_replace("{name}", $name, $text);
+            $this->tg->send_message($text);
             exit();
         }
     }
@@ -68,7 +72,7 @@ class Profile
         $this->db->update_user_location(['region_id' => $region_id]);
     }
 
-    
+
     public function show_profile()
     {
         $user = $this->db->user;

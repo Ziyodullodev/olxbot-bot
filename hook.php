@@ -163,8 +163,6 @@ if (!empty($updates)) {
             $tg->set_replyKeyboard($main_menu)
                 ->send_message($db->get_text('menu_text', $lang));
             exit();
-        } elseif ($text == "/location") {
-            $profile->choice_city($name);
         } elseif ($text == "/menu") {
             $tg
                 ->set_replyKeyboard($main_menu)
@@ -203,7 +201,7 @@ if (!empty($updates)) {
             } elseif ($get_command['command'] == "change_lang") {
                 $profile->lang_keyboard();
             } elseif ($get_command['command'] == "change_location") {
-                $tg->send_message("manzilni almashtirish");
+                $profile->choice_city($name);
             } elseif ($get_command['command'] == "edit_profile") {
                 $tg->send_message("profileni tahrirlash");
             } elseif ($get_command['command'] == "back_button") {
