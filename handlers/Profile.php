@@ -71,10 +71,15 @@ class Profile
     public function show_profile()
     {
         $user = $this->db->user;
-
+        $keyboard = $this->db->db->query("SELECT * FROM `menu` WHERE `type` = 'profile_menu'")->fetchAll(PDO::FETCH_ASSOC);
+        $keys = [];
+        foreach ($keyboard as $key => $value) {
+            $keys[] = [$value['name_'. $user['lang']]];
+        }
         $location = $this->db->get_user_location($user['id']);
         $phone_number = $user['phone_number'] ?? "Telefon raqam kiritilmagan";
-        $this->tg->send_message("Sizning profiliz:\n\nIsm: {$user['name']}\nViloyat: {$location['city_name']}\nTuman: {$location['region_name']}\nTelefon raqam: {$phone_number}");
+        $this->tg->set_replyKeyboard($keys)
+        ->send_message("Sizning profiliz:\n\nIsm: {$user['name']}\nViloyat: {$location['city_name']}\nTuman: {$location['region_name']}\nTelefon raqam: {$phone_number}");
     }
 
     public function change_lang($lang)
