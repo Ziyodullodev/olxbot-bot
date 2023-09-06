@@ -202,7 +202,7 @@ if (!empty($updates)) {
                 $profile->lang_keyboard();
             } elseif ($get_command['command'] == "change_location") {
                 $tg->set_replyKeyboard([], true)
-                    ->send_message("Qaysi viloyatdansiz?". $updates['message']['message_id']);
+                    ->send_message(".")->delete_message($updates['message']['message_id']+1);
                 $profile->choice_city($name, false, true);
             } elseif ($get_command['command'] == "edit_profile") {
                 $tg->send_message("profileni tahrirlash");
