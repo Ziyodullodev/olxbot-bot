@@ -8,12 +8,7 @@ require_once "components/menus.php";
 require_once 'lang/i18n.class.php';
 
 $tg = new Telegram(['token' => $config['token']]);
-// $tg->set_webhook("https://ziyodev.uz/olx-telegram/src/hook.php");
 $updates = $tg->get_webhookUpdates();
-// $i18n = new i18n('lang/lang_{LANGUAGE}.ini', 'langcache/', 'uz');
-// $i18n->getAppliedLang();
-// $i18n->getCachePath();
-
 if (!empty($updates)) {
 
     if (!empty($updates['message']['chat']['id'])) {
@@ -36,7 +31,8 @@ if (!empty($updates)) {
         $profile->choice_city($name, true);
         exit();
     }
-
+    $tg->send_message("test");
+    exit();
     $step = $user_profile['step'];
     $lang = 'uz';
     $menus = $db->get_menu($lang);
