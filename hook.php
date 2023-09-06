@@ -493,3 +493,4 @@ if (!empty($updates)) {
         $text = "";
     }
 }
+
