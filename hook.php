@@ -8,7 +8,7 @@ require_once "components/menus.php";
 require_once 'lang/i18n.class.php';
 
 $tg = new Telegram(['token' => $config['token']]);
-//$tg->set_webhook("https://bot.hehe.uz/olxbot-bot/hook.php");
+$tg->set_webhook("https://9dee-195-158-3-178.ngrok-free.app/hook.php");
 $updates = $tg->get_webhookUpdates();
 if (!empty($updates)) {
 
@@ -24,7 +24,7 @@ if (!empty($updates)) {
 
     }
 
-    $db = new Localbase($chat_id);
+    $db = new Localbase($chat_id, $config['dbHost'], $config['dbName'], $config['dbUser'], $config['dbPassword']);
     $profile = new Profile($db, $tg, $chat_id);
     $giverent = new Giverent($db, $tg, $chat_id);
     $user_profile = $db->user;
@@ -58,7 +58,7 @@ if (!empty($updates)) {
         if ($step == "start") {
             $profile->choice_city($name);
             exit();
-        } elseif ($step == "add_product") {
+        } elseif ($step == "add_product" and $text != $db->get_text('back_button', $lang)) {
             $tg->set_replyKeyboard([[$db->get_text('back_button', $lang)]])
                 ->send_message($db->get_text('send_product_info', $lang));
             $action = json_decode($user_profile['back']);

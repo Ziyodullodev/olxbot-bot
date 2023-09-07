@@ -8,12 +8,16 @@ class Localbase
     public $user;
     private $db_lang = 'mysql';
     private $db_host = 'localhost';
-    private $dbname = 'ziyodullo_olxbot';
-    private $db_username = 'ziyodullo_olxbot';
-    private $db_password = 'j^tpMx)G9[/A@I#;';
+    private $dbname;
+    private $db_username;
+    private $db_password;
 
-    function __construct($chat_id)
+    function __construct($chat_id, $db_host, $dbname , $db_username, $db_password)
     {
+        $this->db_host = $db_host;
+        $this->dbname = $dbname;
+        $this->db_username = $db_username;
+        $this->db_password = $db_password;
         $this->chat_id = $chat_id;
         $this->connect();
         $this->get_user();
