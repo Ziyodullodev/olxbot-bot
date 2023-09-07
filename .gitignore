@@ -79,3 +79,6 @@ fabric.properties
 .idea/caches/build_file_checksums.ser
 
 .env
+
+composer.phar
+/vendor/
