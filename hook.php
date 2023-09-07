@@ -8,7 +8,7 @@ require_once "components/menus.php";
 require_once 'lang/i18n.class.php';
 
 $tg = new Telegram(['token' => $config['token']]);
-$tg->set_webhook("https://9dee-195-158-3-178.ngrok-free.app/hook.php");
+//$tg->set_webhook("");
 $updates = $tg->get_webhookUpdates();
 if (!empty($updates)) {
 
