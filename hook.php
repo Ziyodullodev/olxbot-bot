@@ -8,7 +8,7 @@ require_once "components/menus.php";
 require_once 'lang/i18n.class.php';
 
 $tg = new Telegram(['token' => $config['token']]);
-$data = $tg->set_webhook("https://bot.hehe.uz/olxbot-bot/hook.php");
+$tg->set_webhook("https://9dee-195-158-3-178.ngrok-free.app/hook.php");
 $updates = $tg->get_webhookUpdates();
 if (!empty($updates)) {
 
@@ -73,7 +73,7 @@ if (!empty($updates)) {
             $db->update_user(['step' => 'add_product_photo']);
             exit();
         } elseif ($step == "phone_number") {
-            if (stripos($text, "+998") !== 0) {
+            if (stripos($text, "+998") !== 0 and strlen($text) != 13) {
                 $tg->send_message($db->get_text("send_phone_number", $lang));
                 exit();
             }
