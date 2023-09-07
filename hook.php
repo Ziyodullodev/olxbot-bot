@@ -8,7 +8,7 @@ require_once "components/menus.php";
 require_once 'lang/i18n.class.php';
 
 $tg = new Telegram(['token' => $config['token']]);
-//$tg->set_webhook("");
+$data = $tg->set_webhook("https://bot.hehe.uz/olxbot-bot/hook.php");
 $updates = $tg->get_webhookUpdates();
 if (!empty($updates)) {
 
