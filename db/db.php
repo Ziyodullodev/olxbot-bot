@@ -6,9 +6,9 @@ class Database
     public $user_id;
     private $db_lang = 'mysql';
     private $db_host = 'localhost';
-    private $dbname = 'my-health';
-    private $db_username = 'my-health';
-    private $db_password = 'cU7cJ1fF4a';
+    private $dbname = 'ziyodullo';
+    private $db_username = 'root';
+    private $db_password = '2001';
 
     function __construct($chat_id)
     {
