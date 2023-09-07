@@ -15,7 +15,7 @@ class Profile
     }
 
 
-    function choice_city($name, $action = false)
+    function choice_city($name, $action = false, $edit = false)
     {
         $i = 0;
         $c = 2;
@@ -25,14 +25,23 @@ class Profile
             $keys[floor($i / $c)][$i % $c] = ['text' => $value['name'], 'callback_data' => $value['id']];
             $i++;
         }
-        $this->tg->set_inlineKeyboard($keys)
-            ->send_message("Assalomu alaykum, $name\ntuda suda karochi\n\nQaysi viloyatdansiz?");
+        $this->tg->set_inlineKeyboard($keys);
 
         if (!$action) {
+            
             $this->db->update_user(['step' => $step]);
+            $text = $this->db->get_text("choice_city", $this->db->user['lang']) . $this->tg->get_webhookUpdates()['message']['message_id'];
+            if ($edit) {
+                $this->tg->edit_message($text, $this->tg->get_webhookUpdates()['message']['message_id']+2);
+            } else {
+                $this->tg->send_message($text);
+            }
         } else {
             $user_id = $this->db->create_user($name, $step, $this->chat_id);
             $this->db->create_user_location($user_id);
+            $text = $this->db->get_text("start_text", 'uz');
+            $text = str_replace("{name}", $name, $text);
+            $this->tg->send_message($text);
             exit();
         }
     }
@@ -56,7 +65,7 @@ class Profile
 
     function choice_region_redirect_menu($region_id)
     {
-        $menus = $this->db->get_menu();
+        $menus = $this->db->get_menu($this->db->user['lang']);
         $menu = [];
         foreach ($menus as $key => $value) {
             $menu[] = [$value['name']];
@@ -67,6 +76,7 @@ class Profile
         $this->db->update_user(['step' => "menu"]);
         $this->db->update_user_location(['region_id' => $region_id]);
     }
+
 
     public function show_profile()
     {

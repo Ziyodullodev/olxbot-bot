@@ -5,13 +5,17 @@ class Database
     public $db;
     public $user_id;
     private $db_lang = 'mysql';
-    private $db_host = 'localhost';
-    private $dbname = 'my-health';
-    private $db_username = 'my-health';
-    private $db_password = 'cU7cJ1fF4a';
+    private $db_host;
+    private $dbname;
+    private $db_username;
+    private $db_password;
 
-    function __construct($chat_id)
+    function __construct($chat_id, $db_host, $dbname, $db_username, $db_password)
     {
+        $this->db_host = $db_host;
+        $this->dbname = $dbname;
+        $this->db_username = $db_username;
+        $this->db_password = $db_password;
         $this->user_id = $chat_id;
         $this->connect();
     }

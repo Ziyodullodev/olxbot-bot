@@ -8,12 +8,16 @@ class Localbase
     public $user;
     private $db_lang = 'mysql';
     private $db_host = 'localhost';
-    private $dbname = 'ziyodullo_olxbot';
-    private $db_username = 'ziyodullo_olxbot';
-    private $db_password = 'j^tpMx)G9[/A@I#;';
+    private $dbname;
+    private $db_username;
+    private $db_password;
 
-    function __construct($chat_id)
+    function __construct($chat_id, $db_host, $dbname , $db_username, $db_password)
     {
+        $this->db_host = $db_host;
+        $this->dbname = $dbname;
+        $this->db_username = $db_username;
+        $this->db_password = $db_password;
         $this->chat_id = $chat_id;
         $this->connect();
         $this->get_user();
@@ -42,7 +46,7 @@ class Localbase
     public function create_user($name, $step, $chatId, $lang = 'uz')
     {
         // Prepare the SQL statement
-        $sql = "INSERT INTO `olx-telegram`.`users` (`id`, `chat_id`, `name`, `phone_number`, `step`, `lang`, `create_at`) 
+        $sql = "INSERT INTO `users` (`id`, `chat_id`, `name`, `phone_number`, `step`, `lang`, `create_at`) 
         VALUES (NULL, :chatId, :name, NULL, :step, :lang, CURRENT_TIMESTAMP);";
         $stmt = $this->db->prepare($sql);
         $stmt->bindParam(':name', $name);
@@ -103,7 +107,7 @@ class Localbase
 
     public function create_user_location($user_id = null)
     {
-        $sql = "INSERT INTO `olx-telegram`.`location` (`id`, `user_id`, `longitude`, `latitude`, `city_id`, `region_id`, `create_at`)
+        $sql = "INSERT INTO `location` (`id`, `user_id`, `longitude`, `latitude`, `city_id`, `region_id`, `create_at`)
             VALUES (NULL, :user_id, NULL, NULL, NULL, NULL, CURRENT_TIMESTAMP);";
 
         $stmt = $this->db->prepare($sql);
@@ -145,7 +149,7 @@ class Localbase
 
     public function get_command_by_menu_name($menu_name, $lang)
     {
-        $stmt = $this->db->query("SELECT command FROM `menu` WHERE `name_{$lang}` = '{$menu_name}'");
+        $stmt = $this->db->query("SELECT command FROM `menu` WHERE `name_{$lang}` = '{$menu_name}' and `type` != 'text'");
         $data = $stmt->fetch(PDO::FETCH_ASSOC);
         return $data;
     }
@@ -155,7 +159,7 @@ class Localbase
         $user_id = $this->user['id'];
         $description = "none";
         $phone_number = "none";
-        $sql = "INSERT INTO `olx-telegram`.`products` (`id`, `title`, `description`, `user_id`, `phone_number`, `category_id`, `create_at`) 
+        $sql = "INSERT INTO `products` (`id`, `title`, `description`, `user_id`, `phone_number`, `category_id`, `create_at`) 
           VALUES (NULL, :title, :description, :user_id, :phone_number, :category_id, CURRENT_TIMESTAMP);";
         $stmt = $this->db->prepare($sql);
         $stmt->bindParam(':title', $title);
@@ -194,7 +198,7 @@ class Localbase
     // create img for product fucntion
     public function create_img($product_id, $img_url)
     {
-        $sql = "INSERT INTO `olx-telegram`.`product_image` (`id`, `product_id`, `image`, `create_at`) 
+        $sql = "INSERT INTO `product_image` (`id`, `product_id`, `image`, `create_at`) 
           VALUES (NULL, :product_id, :img_url, CURRENT_TIMESTAMP);";
         $stmt = $this->db->prepare($sql);
         $stmt->bindParam(':product_id', $product_id);

@@ -8,7 +8,7 @@ require_once "components/menus.php";
 require_once 'lang/i18n.class.php';
 
 $tg = new Telegram(['token' => $config['token']]);
-//$tg->set_webhook("https://bot.hehe.uz/olxbot-bot/hook.php");
+$tg->set_webhook("https://9dee-195-158-3-178.ngrok-free.app/hook.php");
 $updates = $tg->get_webhookUpdates();
 if (!empty($updates)) {
 
@@ -24,7 +24,7 @@ if (!empty($updates)) {
 
     }
 
-    $db = new Localbase($chat_id);
+    $db = new Localbase($chat_id, $config['dbHost'], $config['dbName'], $config['dbUser'], $config['dbPassword']);
     $profile = new Profile($db, $tg, $chat_id);
     $giverent = new Giverent($db, $tg, $chat_id);
     $user_profile = $db->user;
@@ -63,7 +63,7 @@ if (!empty($updates)) {
         if ($step == "start") {
             $profile->choice_city($name);
             exit();
-        } elseif ($step == "add_product") {
+        } elseif ($step == "add_product" and $text != $db->get_text('back_button', $lang)) {
             $tg->set_replyKeyboard([[$db->get_text('back_button', $lang)]])
                 ->send_message($db->get_text('send_product_info', $lang));
             $action = json_decode($user_profile['back']);
@@ -78,7 +78,7 @@ if (!empty($updates)) {
             $db->update_user(['step' => 'add_product_photo']);
             exit();
         } elseif ($step == "phone_number") {
-            if (stripos($text, "+998") !== 0) {
+            if (stripos($text, "+998") !== 0 and strlen($text) != 13) {
                 $tg->send_message($db->get_text("send_phone_number", $lang));
                 exit();
             }
@@ -168,8 +168,6 @@ if (!empty($updates)) {
             $tg->set_replyKeyboard($main_menu)
                 ->send_message($db->get_text('menu_text', $lang));
             exit();
-        } elseif ($text == "/location") {
-            $profile->choice_city($name);
         } elseif ($text == "/menu") {
             $tg
                 ->set_replyKeyboard($main_menu)
@@ -207,6 +205,15 @@ if (!empty($updates)) {
                 }
             } elseif ($get_command['command'] == "change_lang") {
                 $profile->lang_keyboard();
+            } elseif ($get_command['command'] == "change_location") {
+                $tg->set_replyKeyboard([], true)
+                    ->send_message(".")->delete_message($updates['message']['message_id']+1);
+                $profile->choice_city($name, false, true);
+            } elseif ($get_command['command'] == "edit_profile") {
+                $tg->send_message("profileni tahrirlash");
+            } elseif ($get_command['command'] == "back_button") {
+                    $tg->set_replyKeyboard($main_menu)
+                    ->send_message($db->get_text('menu_text', $lang));
             }
         } else {
             $tg->set_replyKeyboard($main_menu)
@@ -345,10 +352,6 @@ if (!empty($updates)) {
         } elseif ($step == "choice_region") {
             # viloyat capital
             $profile->choice_region_redirect_menu($data);
-            $product = $db->get_product($data);
-            $user_id = $product['user_id'];
-            $user_chat_id = $db->get_user_chat_id($user_id);
-            $tg->send_message("test", $user_chat_id);
 
         } elseif ($data == "phone_number") {
             $tg->delete_message()
@@ -495,3 +498,4 @@ if (!empty($updates)) {
         $text = "";
     }
 }
+
