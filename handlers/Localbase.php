@@ -196,13 +196,14 @@ class Localbase
     }
 
     // create img for product fucntion
-    public function create_img($product_id, $img_url)
+    public function create_img($product_id, $img_url, $local_url = null)
     {
-        $sql = "INSERT INTO `product_image` (`id`, `product_id`, `image`, `create_at`) 
-          VALUES (NULL, :product_id, :img_url, CURRENT_TIMESTAMP);";
+        $sql = "INSERT INTO `product_image` (`id`, `product_id`, `image_url`, `local_url`, `create_at`) 
+          VALUES (NULL, :product_id, :img_url, :local_url, CURRENT_TIMESTAMP);";
         $stmt = $this->db->prepare($sql);
         $stmt->bindParam(':product_id', $product_id);
         $stmt->bindParam(':img_url', $img_url);
+        $stmt->bindParam(':local_url', $local_url);
         $stmt->execute();
         return $this->db->lastInsertId();
     }
@@ -254,3 +255,4 @@ class Localbase
 // $db = new Localbase("848796050");
 // var_dump($db->user);
 // var_dump($db->get_product(6));
+

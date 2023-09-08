@@ -122,7 +122,7 @@ class Giverent
         $lang = "uz";
         if ($action == "product") {
             // Retrieve all images for the product
-            $stmt = $this->db->db->prepare("SELECT image FROM product_image WHERE product_id = :product_id");
+            $stmt = $this->db->db->prepare("SELECT image_url as image FROM product_image WHERE product_id = :product_id");
             $stmt->bindParam(':product_id', $id, PDO::PARAM_INT);
             $stmt->execute();
 
