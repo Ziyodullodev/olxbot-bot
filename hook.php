@@ -5,11 +5,13 @@ $config = require_once "config.php";
 require_once "autoload.php";
 require_once "components/functions.php";
 require_once "components/menus.php";
-require_once 'lang/i18n.class.php';
 
 $tg = new Telegram(['token' => $config['token']]);
-$tg->set_webhook("https://9dee-195-158-3-178.ngrok-free.app/hook.php");
+// $tg->set_webhook("https://bot.hehe.uz/olxbot-bot/hook.php");
 $updates = $tg->get_webhookUpdates();
+$tg->send_message("Bot test rejimida ishlamoqda", 848796050);
+//$okey = $tg->send_photo("AgACAgIAAx0CcqnqEAADDWT6_MAerVyPk4mE4InGgxPNd1U1AAI_5DEb7NzYS4F5_vNc6JCBAQADAgADbQADMAQ", "product image", 848796050);
+exit();
 if (!empty($updates)) {
 
     if (!empty($updates['message']['chat']['id'])) {
@@ -32,8 +34,7 @@ if (!empty($updates)) {
         $profile->choice_city($name, true);
         exit();
     }
-    // $tg->send_message("test rejimda");
-    // exit();
+
     $step = $user_profile['step'];
     $lang = $user_profile['lang'];
     $menus = $db->get_menu($lang);
@@ -73,72 +74,78 @@ if (!empty($updates)) {
             $db->update_user(['step' => 'add_product_photo']);
             exit();
         } elseif ($step == "phone_number") {
-            if (stripos($text, "+998") !== 0 and strlen($text) != 13) {
-                $tg->send_message($db->get_text("send_phone_number", $lang));
-                exit();
-            }
-            $db->update_user(['phone_number' => $text]);
-            $db->update_product(['phone_number' => $text], $user_profile['back']);
-            $tg->set_replyKeyboard($main_menu)
-                ->send_message($db->get_text("thanks_for_our", $lang));
-
-            // sending moderator message new product
-            $product = $db->get_product($user_profile['back']);
-            $stmt = $db->db->prepare("SELECT image FROM product_image WHERE product_id = :product_id");
-            $stmt->bindParam(':product_id', $product, PDO::PARAM_INT);
-            $stmt->execute();
-
-            $products = $db->db->query("SELECT 
+            if (stripos($text, "+998") === 0 and strlen($text) == 13) {
+                if (preg_match("/^[0-9]{12}$/", substr($text, 1, 12))) {
+                    $db->update_user(['phone_number' => $text]);
+                    $db->update_product(['phone_number' => $text], $user_profile['back']);
+                    $tg
+                        ->set_replyKeyboard($main_menu)
+                        ->send_message($db->get_text("thanks_for_our", $lang));
+                    // sending moderator message new product
+                    $product = $db->get_product($user_profile['back']);
+                    $stmt = $db->db->prepare("SELECT image_url as image FROM product_image WHERE product_id = :product_id");
+                    $stmt->bindParam(':product_id', $product['id'], PDO::PARAM_INT);
+                    $stmt->execute();
+                    $products = $db->db->query("SELECT 
                pr.title, pr.description, 
                users.name, users.chat_id, users.phone_number,
                cat.title_uz as category_title
                FROM products as pr
                LEFT JOIN users ON users.id = pr.user_id
                LEFT JOIN categories as cat ON cat.id = pr.category_id
-               WHERE pr.id = {$product}")->fetch(PDO::FETCH_ASSOC);
-            // Initialize an array to store media items
-            $mediaItems = [];
+               WHERE pr.id = {$product['id']}")->fetch(PDO::FETCH_ASSOC);
+                    // // Initialize an array to store media items
+                    $mediaItems = [];
 
-            // Fetch all images and create media items
-            $i = 0;
-            $text = "🛍 <b>" . $products['title'] . "</b>\n\n<i>" . $products['description'] . "</i>\n\n" . "📞 Telefon raqam: <b>" . $this->db->user['phone_number'] . "</b>\n\n" . "👤 Sotuvchi: <b>" . $products['name'] . "</b>\n\n" . "📦 Kategoriya: <b>" . $products['category_title'] . "</b>";
-            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                // Check if the 'image' column is not null
-                if (!is_null($row['image'])) {
-                    // Create a media item for each image
-                    if ($i == 0) {
-                        $mediaItems[] = [
-                            'type' => 'photo',
-                            // Specify the media type as photo
-                            'media' => $row['image'],
-                            // URL or file ID of the image
-                            'caption' => $text,
-                            'parse_mode' => 'HTML'
-                        ];
-                        $i++;
-                    } else {
-                        $mediaItems[] = [
-                            'type' => 'photo',
-                            // Specify the media type as photo
-                            'media' => $row['image'],
-                            // URL or file ID of the image
-                        ];
+                    // Fetch all images and create media items
+                    $i = 0;
+                    $text = "🛍 <b>" . $products['title'] . "</b>\n\n<i>" . $products['description'] . "</i>\n\n" . "📞 Telefon raqam: <b>" . $products['phone_number'] . "</b>\n\n" . "👤 Sotuvchi: <b>" . $products['name'] . "</b>\n\n" . "📦 Kategoriya: <b>" . $products['category_title'] . "</b>";
+                    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                        // Check if the 'image' column is not null
+                        if (!is_null($row['image'])) {
+                            // Create a media item for each image
+                            if ($i == 0) {
+                                $mediaItems[] = [
+                                    'type' => 'photo',
+                                    // Specify the media type as photo
+                                    'media' => $row['image'],
+                                    // URL or file ID of the image
+                                    'caption' => $text,
+                                    'parse_mode' => 'HTML'
+                                ];
+                                $i++;
+                            } else {
+                                $mediaItems[] = [
+                                    'type' => 'photo',
+                                    // Specify the media type as photo
+                                    'media' => $row['image'],
+                                    // URL or file ID of the image
+                                ];
+                            }
+                        }
                     }
+                    if (!empty($mediaItems)) {
+                        //      // Send the media group
+                        $tg->send_media_group($mediaItems);
+                    } else {
+                        $tg->send_message($text);
+                    }
+                    $text = "⬆️ Tepadagi elonni tasdiqlang yoki rad eting";
+                    $tg->set_inlineKeyboard(
+                        [
+                            [
+                                ['text' => "✅ Tasdiqlash", 'callback_data' => "confirm_product-{$product['id']}"],
+                                ['text' => "❌ Rad etish", 'callback_data' => "reject_product-{$product['id']}"]
+                            ]
+                        ]
+                    )
+                    ->send_message($text, $config['admin_id']);
+                    $db->update_user(['step' => 'menu']);
+                    exit();
                 }
             }
-            $text = "Tepadagi elonni tasdiqlang yoki rad eting";
-            $tg->set_inlineKeyboard(
-                [
-                    [
-                        ['text' => "Tasdiqlash", 'callback_data' => "confirm_product-{$product['id']}"],
-                        ['text' => "Rad etish", 'callback_data' => "reject_product-{$product['id']}"]
-                    ]
-                ]
-            )
-                ->send_message($text, $config['admin_id']);
-            $db->update_user(['step' => 'manu']);
+            $tg->send_message($db->get_text("send_phone_number", $lang));
             exit();
-
         } elseif ($step == "lang") {
             if ($text == "🇺🇿 O'zbekcha") {
                 $profile->change_lang('uz');
@@ -202,12 +209,12 @@ if (!empty($updates)) {
                 $profile->lang_keyboard();
             } elseif ($get_command['command'] == "change_location") {
                 $tg->set_replyKeyboard([], true)
-                    ->send_message(".")->delete_message($updates['message']['message_id']+1);
+                    ->send_message(".")->delete_message($updates['message']['message_id'] + 1);
                 $profile->choice_city($name, false, true);
             } elseif ($get_command['command'] == "edit_profile") {
                 $tg->send_message("profileni tahrirlash");
             } elseif ($get_command['command'] == "back_button") {
-                    $tg->set_replyKeyboard($main_menu)
+                $tg->set_replyKeyboard($main_menu)
                     ->send_message($db->get_text('menu_text', $lang));
             }
         } else {
@@ -383,6 +390,7 @@ if (!empty($updates)) {
             $tg->delete_message()
                 ->set_replyKeyboard($main_menu)
                 ->send_message($db->get_text('menu_text', $lang));
+                $db->update_user(['step' => 'menu']);
         }
 
     } elseif (!empty($updates['message']['contact'])) {
@@ -483,7 +491,21 @@ if (!empty($updates)) {
                 exit();
             }
             $photo_url = end($updates['message']['photo']);
-            $db->create_img($product_id, $photo_url['file_id']);
+            $id = $db->create_img($product_id, $photo_url['file_id']);
+            //$url = json_decode(file_get_contents('https://api.telegram.org/bot'.$config['token'].'/getFile?file_id='.$photo_url['file_id']),true);
+            
+            //$path=$url['result']['file_path'];
+            //$file = 'https://api.telegram.org/file/bot'.$config['token'].'/'.$path;
+            //$type = strtolower(strrchr($file,'.')); 
+            //$type=str_replace('.','',$type);
+            // generate a unique random string to be used as the boundary marker
+            //$mime_boundary="product".md5(mt_rand())."." . $type;
+            //$okey = file_put_contents("images/" . $mime_boundary, file_get_contents($file));
+            //$tg->send_message($mime_boundary);
+            $okey = $tg->send_photo($photo_url['file_id'], "{$id}", $config['arxiv_channel_id']);
+            //$tg->send_message(json_encode($okey), 848796050);
+            //$tg->send_message("test", $config['arxiv_channel_id']);
+            exit();
             $tg->set_replyKeyboard([[$db->get_text('ready_button', $lang)], [$db->get_text('back_button', $lang)]])
                 ->send_message($db->get_text('limit_images', $lang));
             exit();
@@ -493,4 +515,3 @@ if (!empty($updates)) {
         $text = "";
     }
 }
-

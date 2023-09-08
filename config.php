@@ -21,6 +21,8 @@ return [
     'dbName' => $dbName,
     'admin_id' => '848796050',
     'channel_id' => '848796050',
+    'arxiv_channel_id' => "-1001923738128",
 ];
+
 
 
