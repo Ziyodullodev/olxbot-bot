@@ -13,22 +13,24 @@ if (!empty($updates)) {
 
     if (!empty($updates['message']['chat']['id'])) {
         $chatData = $updates['message']['chat'];
+        $message_id = $updates['message']['message_id'];
     } elseif (!empty($updates['callback_query']['message']['chat']['id'])) {
         $chatData = $updates['callback_query']['message']['chat'];
+        $message_id = $updates['callback_query']['message']['message_id'];
     } else {
         $tg->send_message("Xatolik yuz berdi", "848796050");
         exit();
     }
-    $user_message_id = getUserConfig("users/$chatData.json",'message_id');
-    if (isset($user_message_id)) {
-        if ($user_message_id != $updates['message']['message_id']) {
-            $tg->delete_message($user_message_id);
-        }
-    }
-    setUserConfig("users/$chatData.json",'message_id', $updates['message']['message_id']);
     $tg->set_chatId($chatData['id']);
     $chat_id = $chatData['id'];
     $name = $chatData['first_name'];
+    $user_message_id = getUserConfig("users/$chat_id.json",'message_id');
+    if (isset($user_message_id)) {
+        if ($user_message_id >= $message_id) {
+            $tg->delete_message($message_id);
+            exit();
+        }
+    }
     if ($chat_id == $config['arxiv_channel_id']) {
         $tg->send_message("Kanaldan xatolik", "848796050");
         exit();
@@ -51,6 +53,7 @@ if (!empty($updates)) {
 
     if (!empty($updates['message']['text'])) {
         $text = $updates['message']['text'];
+        setUserConfig("users/$chat_id.json",'message_id', $message_id);
         if ($text == $db->get_text('back_button', $lang)) {
             $tg->set_replyKeyboard($main_menu)
                 ->send_message($db->get_text('menu_text', $lang));
@@ -64,7 +67,7 @@ if (!empty($updates)) {
         if ($step == "start") {
             $profile->choice_city($name);
             exit();
-        } elseif ($step == "add_product" and $text != $db->get_text('back_button', $lang)) {
+        } elseif ($step == "add_product" and $text != "/start") {
             $tg->set_replyKeyboard([[$db->get_text('back_button', $lang)]])
                 ->send_message($db->get_text('send_product_info', $lang));
             $action = json_decode($user_profile['back']);
@@ -72,7 +75,7 @@ if (!empty($updates)) {
             $id = $db->create_product($category_id, $text);
             $db->update_user(['step' => 'add_product_info', 'page' => 'add', 'back' => $id]);
             exit();
-        } elseif ($step == "add_product_info") {
+        } elseif ($step == "add_product_info" and $text != "/start") {
             $product_id = $user_profile['back'];
             $db->update_product(['description' => $text], $product_id);
             $tg->set_replyKeyboard([[$db->get_text('back_button', $lang)]])->send_message($db->get_text("send_product_photo", $lang));
@@ -132,7 +135,7 @@ if (!empty($updates)) {
                 ->send_message($db->get_text('change_lang_success', $lang));
             exit();
 
-        } elseif ($step == "search_product") {
+        } elseif ($step == "search_product" and $text != "/start") {
             $tg->set_replyKeyboard($main_menu)
                 ->send_message("Bu funksiya hali ishlamayapti");
             $db->update_user(['step' => 'menu']);
@@ -189,7 +192,7 @@ if (!empty($updates)) {
                 $tg->send_message("Bu funksiya hali ishlamayapti");
                 exit();
                 $tg->set_replyKeyboard([], true)
-                    ->send_message(".")->delete_message($updates['message']['message_id'] + 1);
+                    ->send_message(".")->delete_message($message_id + 1);
                 $profile->choice_city($name, false, true);
             } elseif ($get_command['command'] == "edit_profile") {
                 $tg->send_message("profileni tahrirlash");
@@ -205,6 +208,7 @@ if (!empty($updates)) {
 
     } elseif (!empty($updates['callback_query']['data'])) {
         $data = $updates['callback_query']['data'];
+        setUserConfig("users/$chat_id.json",'message_id', $message_id);
         if (stripos($data, "confirm_product") !== false) {
             $product_id = explode("-", $data)[1];
             $product_user = $db->get_product_user_chat_id($product_id);
@@ -450,7 +454,7 @@ if (!empty($updates)) {
         $text = "";
     }
 } else {
-    //$tg->set_webhook("https://f836-95-214-211-70.ngrok-free.app/hook.php");
+    $tg->set_webhook("https://4084-95-214-211-227.ngrok-free.app/hook.php");
     echo "set webhook success";
     die();
 }
