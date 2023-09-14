@@ -19,7 +19,13 @@ if (!empty($updates)) {
         $tg->send_message("Xatolik yuz berdi", "848796050");
         exit();
     }
-    
+    $user_message_id = getUserConfig("users/$chatData.json",'message_id');
+    if (isset($user_message_id)) {
+        if ($user_message_id != $updates['message']['message_id']) {
+            $tg->delete_message($user_message_id);
+        }
+    }
+    setUserConfig("users/$chatData.json",'message_id', $updates['message']['message_id']);
     $tg->set_chatId($chatData['id']);
     $chat_id = $chatData['id'];
     $name = $chatData['first_name'];
@@ -431,11 +437,11 @@ if (!empty($updates)) {
                 exit();
             }
             $photo_url = end($updates['message']['photo']);
-            $channel_message_id = getUserConfig('message_id');
+            $channel_message_id = getUserConfig('storage.json','message_id');
             $img_link = $config['channel_username'] . "/" . $channel_message_id;
             $id = $db->create_img($product_id,$img_link, $photo_url['file_id']);
             $tg->send_photo($photo_url['file_id'], "{$id}", $config['arxiv_channel_id']);
-            setUserConfig('message_id', $channel_message_id + 1);
+            setUserConfig('storage.json','message_id', $channel_message_id + 1);
             $tg->set_replyKeyboard([[$db->get_text('ready_button', $lang)], [$db->get_text('back_button', $lang)]])
                 ->send_message($db->get_text('limit_images', $lang));
             exit();

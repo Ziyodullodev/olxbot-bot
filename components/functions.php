@@ -1,7 +1,7 @@
 <?php
 
-function setUserConfig($key='', $value='') {
-    $file = 'storage.json';
+function setUserConfig($file_path, $key='', $value='') {
+    $file = $file_path;
     if (file_exists( $file )) {
         $user_data = file_get_contents( $file );
         $user_data = json_decode( $user_data, TRUE );
@@ -14,8 +14,8 @@ function setUserConfig($key='', $value='') {
     return TRUE;
 }
 
-function getUserConfig($key='') {
-    $file = 'storage.json';
+function getUserConfig($file_path, $key='') {
+    $file = $file_path;
     if (file_exists( $file )) {
         $user_data = file_get_contents( $file );
         $user_data = json_decode( $user_data, TRUE );
