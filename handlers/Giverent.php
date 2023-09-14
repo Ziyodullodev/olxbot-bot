@@ -46,11 +46,11 @@ class Giverent
             $user = $this->db->user;
             if ($user['command'] == "sale") {
                 $this->text = "Maxsulot nomini yuboring:";
-                $this->db->update_user(['step' => "add_product", 'back' => json_encode(['menu', 0]), 'page' => 0]);
-                $this->tg->set_inlineKeyboard([
-                    [['text' => "🔙 Orqaga", 'callback_data' => $back]]
-                ]);
-                return;
+                $this->db->update_user(['step' => "add_product", 'back' => json_encode(['menu', $id]), 'page' => 0]);
+                $this->tg->delete_message()
+                    ->set_replyKeyboard([["🔙 Orqaga"]]);
+                $this->tg->send_message($this->text);
+                exit();
             }
             $categorys = $this->db->db->query("SELECT products.title as title_uz,products.title as title_ru, products.id FROM products WHERE category_id = {$id} and active = 1 LIMIT {$limit} OFFSET 0")->fetchAll(PDO::FETCH_ASSOC);
             //  and active = 1
@@ -122,63 +122,129 @@ class Giverent
         $lang = "uz";
         if ($action == "product") {
             // Retrieve all images for the product
-            $stmt = $this->db->db->prepare("SELECT image_url as image FROM product_image WHERE product_id = :product_id");
-            $stmt->bindParam(':product_id', $id, PDO::PARAM_INT);
-            $stmt->execute();
-
-            $products = $this->db->db->query("SELECT 
-               pr.title, pr.description, 
-               users.name, users.chat_id, users.phone_number,
-               cat.title_uz as category_title
-               FROM products as pr
-               LEFT JOIN users ON users.id = pr.user_id
-               LEFT JOIN categories as cat ON cat.id = pr.category_id
-               WHERE pr.id = {$id}")->fetch(PDO::FETCH_ASSOC);
-            // Initialize an array to store media items
-            $mediaItems = [];
-
-            // Fetch all images and create media items
-            $i = 0;
-            $this->text = "🛍 <b>" . $products['title'] . "</b>\n\n<i>" . $products['description'] . "</i>\n\n" . "📞 Telefon raqam: <b>" . $this->db->user['phone_number'] . "</b>\n\n" . "👤 Sotuvchi: <b>" . $products['name'] . "</b>\n\n" . "📦 Kategoriya: <b>" . $products['category_title'] . "</b>";
-            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                // Check if the 'image' column is not null
-                if (!is_null($row['image'])) {
-                    // Create a media item for each image
-                    if ($i == 0) {
-                        $mediaItems[] = [
-                            'type' => 'photo',
-                            // Specify the media type as photo
-                            'media' => $row['image'],
-                            // URL or file ID of the image
-                            'caption' => $this->text,
-                            'parse_mode' => 'HTML'
-                        ];
-                        $i++;
-                    } else {
-                        $mediaItems[] = [
-                            'type' => 'photo',
-                            // Specify the media type as photo
-                            'media' => $row['image'],
-                            // URL or file ID of the image
-                        ];
-                    }
-                }
-            }
-
             $key = [
                 [['text' => "🔙 Orqaga", 'callback_data' => $back]]
             ];
+
             $this->tg->set_inlineKeyboard($key);
-            // Check if there are any media items to send
-            if (!empty($mediaItems)) {
+            $product_photos = send_product_photos($this->db, $id);
+            if (!empty($product_photos[0])) {
                 //      // Send the media group
-                $this->tg->send_media_group($mediaItems);
+                $this->tg->send_media_group($product_photos[0]);
                 return false;
+            } else {
+                $this->text = $product_photos[1];
             }
+
+            // Check if there are any media items to send
+
             return true;
         }
         $products = $this->db->db->query("SELECT * FROM products WHERE category_id = {$id} and active = 1 LIMIT {$limit} OFFSET {$start}")->fetchAll(PDO::FETCH_ASSOC);
         $stmt = $this->db->db->query("SELECT COUNT(*) as count FROM products WHERE category_id = {$id} and active = 1");
+        $result = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+        $this->text = "Mahsulotlardan birini tanlang:";
+        $i = 0;
+        foreach ($products as $key_text) {
+            $product_name = $key_text['title'];
+            $product_id = $key_text['id'];
+            $keys[] = [['text' => $product_name, 'callback_data' => $product_id]];
+            $i++;
+        }
+
+        $this->db->update_user(['total_count' => $result]);
+        $pagination_count = ceil($result / $limit);
+        $i += $start;
+        $n = ceil($i / $limit);
+        if ($pagination_count > 1) {
+            $pagination = [
+                ['text' => "⬅️", 'callback_data' => 'prev'],
+                ['text' => $n . " / " . $pagination_count, 'callback_data' => 'pagination_product'],
+                ['text' => "➡️", 'callback_data' => 'next']
+            ];
+            $keys[] = $pagination;
+        }
+        $keys[] = [['text' => "🔙 Orqaga", 'callback_data' => $back]];
+
+        $this->tg->set_inlineKeyboard($keys);
+        return true;
+    }
+
+    function search_product($text = "", $start = 0, $action = 'show', $back = "back")
+    {
+        $sending_media = $this->search_product_keyboard($start, $text, $action, $back);
+        if ($back == "backk") {
+            $this->tg->edit_message($this->text);
+        } else {
+            if ($sending_media) {
+                $this->tg->send_message($this->text);
+                $this->db->update_user(['step' => "search_product", 'page' => 0, 'back' => json_encode(['menu', $text])]);
+            } else {
+                $this->tg->delete_message();
+                $this->tg->send_message("Boshqa mahsulotlarni ko'rish uchun 🔙 Orqaga tugmasini bosing");
+            }
+        }
+    }
+
+
+    private function search_product_keyboard($start = 0, $text, $action, $back)
+    {
+        $limit = 4;
+        $lang = "uz";
+        if ($action == "product") {
+            // Retrieve all images for the product
+            $key = [
+                [['text' => "🔙 Orqaga", 'callback_data' => $back]]
+            ];
+
+            $this->tg->set_inlineKeyboard($key);
+            $product_photos = send_product_photos($this->db, $text);
+            if (!empty($product_photos[0])) {
+                //      // Send the media group
+                $this->tg->send_media_group($product_photos[0]);
+                return false;
+            } else {
+                $this->text = $product_photos[1];
+            }
+
+            // Check if there are any media items to send
+
+            return true;
+        }
+        // Define the SQL query with placeholders
+        $sql = "SELECT * FROM products WHERE `title` LIKE :search_text AND active = 1 LIMIT :limit OFFSET :start";
+
+        // Prepare the SQL statement
+        $stmt = $this->db->db->prepare($sql);
+
+        // Bind the parameters
+        $stmt->bindParam(':search_text', "%$text%", PDO::PARAM_STR);
+        $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindParam(':start', $start, PDO::PARAM_INT);
+
+        // Execute the statement
+        $stmt->execute();
+
+        // Fetch the results
+        $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Check if there are no results
+        if (count($products) === 0) {
+            $this->text = "Bunday mahsulot topilmadi";
+            return true;
+        }
+        $sql = "SELECT COUNT(*) as count FROM products WHERE `title` LIKE :search_text AND active = 1";
+
+        // Prepare the SQL statement
+        $stmt = $this->db->db->prepare($sql);
+        
+        // Bind the search_text parameter
+        $stmt->bindParam(':search_text', "%$text%", PDO::PARAM_STR);
+        
+        // Execute the statement
+        $stmt->execute();
+        
+        // Fetch the result
         $result = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
         $this->text = "Mahsulotlardan birini tanlang:";
         $i = 0;

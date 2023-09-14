@@ -2,7 +2,6 @@
 
 require_once __DIR__ . '/vendor/autoload.php'; // Load the library
 
-
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__); // Load the .env.example file in the current directory
 $dotenv->load();
 
@@ -22,6 +21,7 @@ return [
     'admin_id' => '848796050',
     'channel_id' => '848796050',
     'arxiv_channel_id' => "-1001923738128",
+    'channel_username' => 'https://t.me/fddda8c3b1d231944510aafe5bd836b',
 ];
 
 

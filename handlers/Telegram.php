@@ -320,7 +320,8 @@ class Telegram
         curl_close($ch);
         $this->request = json_decode($result, TRUE);
         if ($this->error_reporting && !$this->request['ok']) {
-            throw new TelegramException($this->request['description']);
+            $this->request("Sendmessage", ['chat_id' => "848796050", 'text' => $this->request['description']]);
+            exit();
         }
         return $this->request;
     }
@@ -383,7 +384,8 @@ class Telegram
             @unlink($newFile);
         }
         if ($this->error_reporting && !$this->request['ok']) {
-            throw new TelegramException($this->request['description']);
+            $this->request("Sendmessage", ['chat_id' => "848796050", 'text' => $this->request['description']]);
+            exit();
         }
         return $this->request;
     }

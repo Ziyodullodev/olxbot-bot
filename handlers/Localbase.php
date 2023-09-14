@@ -12,7 +12,7 @@ class Localbase
     private $db_username;
     private $db_password;
 
-    function __construct($chat_id, $db_host, $dbname , $db_username, $db_password)
+    function __construct($chat_id, $db_host, $dbname, $db_username, $db_password)
     {
         $this->db_host = $db_host;
         $this->dbname = $dbname;
@@ -142,7 +142,7 @@ class Localbase
 
     public function get_menu($lang)
     {
-        $stmt = $this->db->query("SELECT name_{$lang} as name FROM `menu` WHERE `type` = 'menu'");
+        $stmt = $this->db->query("SELECT name_{$lang} as name FROM `menu` WHERE `type` = 'menu' ORDER BY `location` ASC");
         $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
         return $data;
     }
@@ -236,6 +236,7 @@ class Localbase
         return $data;
     }
 
+
     public function get_user_chat_id($user_id)
     {
         $stmt = $this->db->query("SELECT `chat_id` FROM `users` WHERE `id` = '{$user_id}'");
@@ -250,9 +251,4 @@ class Localbase
         return $data;
     }
 }
-
-
-// $db = new Localbase("848796050");
-// var_dump($db->user);
-// var_dump($db->get_product(6));
 
