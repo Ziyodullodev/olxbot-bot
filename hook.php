@@ -24,13 +24,7 @@ if (!empty($updates)) {
     $tg->set_chatId($chatData['id']);
     $chat_id = $chatData['id'];
     $name = $chatData['first_name'];
-    $user_message_id = getUserConfig("users/$chat_id.json",'message_id');
-    if (isset($user_message_id)) {
-        if ($user_message_id >= $message_id) {
-            $tg->delete_message($message_id);
-            exit();
-        }
-    }
+    
     if ($chat_id == $config['arxiv_channel_id']) {
         $tg->send_message("Kanaldan xatolik", "848796050");
         exit();
@@ -46,6 +40,13 @@ if (!empty($updates)) {
 
     $step = $user_profile['step'];
     $lang = $user_profile['lang'];
+    $user_message_id = $user_profile['message_id'];
+    if (isset($user_message_id)) {
+        if ($user_message_id >= $message_id) {
+            $tg->delete_message($message_id);
+            exit();
+        }
+    }
     $menus = $db->get_menu($lang);
     foreach ($menus as $menu) {
         $main_menu[] = [$menu['name']];
@@ -53,7 +54,7 @@ if (!empty($updates)) {
 
     if (!empty($updates['message']['text'])) {
         $text = $updates['message']['text'];
-        setUserConfig("users/$chat_id.json",'message_id', $message_id);
+        $db->update_user(['message_id' => $message_id]);
         if ($text == $db->get_text('back_button', $lang)) {
             $tg->set_replyKeyboard($main_menu)
                 ->send_message($db->get_text('menu_text', $lang));
@@ -208,7 +209,7 @@ if (!empty($updates)) {
 
     } elseif (!empty($updates['callback_query']['data'])) {
         $data = $updates['callback_query']['data'];
-        setUserConfig("users/$chat_id.json",'message_id', $message_id);
+        $db->update_user(['message_id' => $message_id]);
         if (stripos($data, "confirm_product") !== false) {
             $product_id = explode("-", $data)[1];
             $product_user = $db->get_product_user_chat_id($product_id);
@@ -454,7 +455,7 @@ if (!empty($updates)) {
         $text = "";
     }
 } else {
-    $tg->set_webhook("https://4084-95-214-211-227.ngrok-free.app/hook.php");
+    // $tg->set_webhook("https://4084-95-214-211-227.ngrok-free.app/hook.php");
     echo "set webhook success";
     die();
 }
