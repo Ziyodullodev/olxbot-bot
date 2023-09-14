@@ -112,6 +112,9 @@ if (!empty($updates)) {
             } elseif ($text == "🇷🇺 Русский") {
                 $profile->change_lang('ru');
                 $lang = "ru";
+            }else{
+                $tg->send_message($db->get_text("change_lang_error", $lang));
+                exit();
             }
 
             $menus = $db->get_menu($lang);
@@ -174,6 +177,8 @@ if (!empty($updates)) {
             } elseif ($get_command['command'] == "change_lang") {
                 $profile->lang_keyboard();
             } elseif ($get_command['command'] == "change_location") {
+                $tg->send_message("Bu funksiya hali ishlamayapti");
+                exit();
                 $tg->set_replyKeyboard([], true)
                     ->send_message(".")->delete_message($updates['message']['message_id'] + 1);
                 $profile->choice_city($name, false, true);
