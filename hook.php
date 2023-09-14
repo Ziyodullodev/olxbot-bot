@@ -85,9 +85,9 @@ if (!empty($updates)) {
                     $product_photos = send_product_photos($db, $product['id']);
                     if (!empty($product_photos[0])) {
                         //      // Send the media group
-                        $tg->send_media_group($product_photos[0]);
+                        $tg->send_media_group($product_photos[0], $config['admin_id']);
                     } else {
-                        $tg->send_message($product_photos[1]);
+                        $tg->send_message($product_photos[1], $config['admin_id']);
                     }
                     $text = "⬆️ Tepadagi elonni tasdiqlang yoki rad eting";
                     $tg->set_inlineKeyboard(
@@ -391,9 +391,9 @@ if (!empty($updates)) {
         $product_photos = send_product_photos($db, $product['id']);
         if (!empty($product_photos[0])) {
             //      // Send the media group
-            $tg->send_media_group($product_photos[0]);
+            $tg->send_media_group($product_photos[0], $config['admin_id']);
         } else {
-            $tg->send_message($product_photos[1]);
+            $tg->send_message($product_photos[1], $config['admin_id']);
         }
         $text = "⬆️ Tepadagi elonni tasdiqlang yoki rad eting";
         $tg->set_inlineKeyboard(
