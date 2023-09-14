@@ -221,6 +221,11 @@ if (!empty($updates)) {
 
             exit();
         }
+        if ($step == "add_product_photo" or $step == "add_product_info" or $step == "add_product") {
+            $tg->delete_message()
+            ->send_message($db->get_text('change_lang_error', $lang));
+            exit();
+        }
         if ($step == "start") {
             $profile->choice_region($data);
             exit();
