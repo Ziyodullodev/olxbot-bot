@@ -124,7 +124,9 @@ if (!empty($updates)) {
             exit();
 
         } elseif ($step == "search_product") {
-           $giverent->search_product($text);
+            $tg->set_replyKeyboard($main_menu)
+                ->send_message("Bu funksiya hali ishlamayapti");
+        //    $giverent->search_product($text);
             exit();
         }
 
