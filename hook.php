@@ -45,6 +45,7 @@ if (!empty($updates)) {
 
     if (!empty($updates['message']['text'])) {
         $text = $updates['message']['text'];
+        $tg->delete_message($updates['message']['message_id'])->delete_message($updates['message']['message_id'] + 1);
         if ($text == $db->get_text('back_button', $lang)) {
             $tg->set_replyKeyboard($main_menu)
                 ->send_message($db->get_text('menu_text', $lang));
