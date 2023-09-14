@@ -209,7 +209,6 @@ if (!empty($updates)) {
 
     } elseif (!empty($updates['callback_query']['data'])) {
         $data = $updates['callback_query']['data'];
-        $db->update_user(['message_id' => $message_id]);
         if (stripos($data, "confirm_product") !== false) {
             $product_id = explode("-", $data)[1];
             $product_user = $db->get_product_user_chat_id($product_id);
