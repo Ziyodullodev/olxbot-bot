@@ -132,7 +132,7 @@ if (!empty($updates)) {
             $db->update_user(['step' => 'menu']);
         //    $giverent->search_product($text);
             exit();
-        } elseif ($step == "add_product_photo"){
+        } elseif ($step == "add_product_photo" and $text != $db->get_text('ready_button', $lang)){
             $tg->send_message($db->get_text("send_product_photo", $lang));
             exit();
         }
