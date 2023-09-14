@@ -126,6 +126,7 @@ if (!empty($updates)) {
         } elseif ($step == "search_product") {
             $tg->set_replyKeyboard($main_menu)
                 ->send_message("Bu funksiya hali ishlamayapti");
+            $db->update_user(['step' => 'menu']);
         //    $giverent->search_product($text);
             exit();
         }
