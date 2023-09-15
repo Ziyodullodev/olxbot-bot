@@ -172,13 +172,18 @@ class Giverent
 
     function search_product($text = "", $start = 0, $action = 'show', $back = "back")
     {
-        $sending_media = $this->search_product_keyboard($start, $text, $action, $back);
+        $test = "not back";
         if ($back == "backk") {
+            $test = "backk";
+            $back = "back";
+        }
+        $sending_media = $this->search_product_keyboard($start, $text, $action, $back);
+        if ($test == "backk") {
             $this->tg->edit_message($this->text);
         } else {
             if ($sending_media) {
                 $this->tg->send_message($this->text);
-                $this->db->update_user(['step' => "search_product", 'page' => 0, 'back' => json_encode(['menu', $text])]);
+                $this->db->update_user(['step' => "search_product", 'page' => 0, 'search_text' => "{$text}"]);
             } else {
                 $this->tg->delete_message();
                 $this->tg->send_message("Boshqa mahsulotlarni ko'rish uchun 🔙 Orqaga tugmasini bosing");
@@ -211,35 +216,25 @@ class Giverent
 
             return true;
         }
-        // Define the SQL query with placeholders
-        $sql = "SELECT * FROM products WHERE `title` LIKE :search_text AND active = 1 LIMIT :limit OFFSET :start";
+        // Define the SQL query with placeholders for the search text
+        $search_text = $this->db->db->quote("%$text%");
+        $sql = "SELECT * FROM products WHERE `search_title` LIKE {$search_text} AND active = 1 LIMIT {$limit} OFFSET {$start}";
 
         // Prepare the SQL statement
         $stmt = $this->db->db->prepare($sql);
-
-        // Bind the parameters
-        $stmt->bindParam(':search_text', "%$text%", PDO::PARAM_STR);
-        $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
-        $stmt->bindParam(':start', $start, PDO::PARAM_INT);
-
-        // Execute the statement
         $stmt->execute();
-
+        
         // Fetch the results
         $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
         // Check if there are no results
         if (count($products) === 0) {
             $this->text = "Bunday mahsulot topilmadi";
             return true;
         }
-        $sql = "SELECT COUNT(*) as count FROM products WHERE `title` LIKE :search_text AND active = 1";
+        $sql = "SELECT COUNT(*) as count FROM products WHERE `search_title` LIKE {$search_text} AND active = 1";
 
         // Prepare the SQL statement
         $stmt = $this->db->db->prepare($sql);
-        
-        // Bind the search_text parameter
-        $stmt->bindParam(':search_text', "%$text%", PDO::PARAM_STR);
         
         // Execute the statement
         $stmt->execute();
@@ -255,7 +250,7 @@ class Giverent
             $i++;
         }
 
-        $this->db->update_user(['total_count' => $result]);
+        $this->db->update_user(['total_count' => $result, 'back' => $text]);
         $pagination_count = ceil($result / $limit);
         $i += $start;
         $n = ceil($i / $limit);

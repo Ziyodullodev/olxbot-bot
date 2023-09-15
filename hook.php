@@ -18,7 +18,9 @@ if (!empty($updates)) {
         $chatData = $updates['callback_query']['message']['chat'];
         $message_id = $updates['callback_query']['message']['message_id'];
     } else {
-        $tg->send_message("Xatolik yuz berdi", "848796050");
+        $channel_message_id = getUserConfig('storage.json','message_id');
+        setUserConfig('storage.json','message_id', $channel_message_id + 1);
+        $tg->send_message("Channel message idsi yangilandi", "848796050");
         exit();
     }
     $tg->set_chatId($chatData['id']);
@@ -73,7 +75,8 @@ if (!empty($updates)) {
                 ->send_message($db->get_text('send_product_info', $lang));
             $action = json_decode($user_profile['back']);
             $category_id = end($action);
-            $id = $db->create_product($category_id, $text);
+            $search_text = clear_text_to_characters($text);
+            $id = $db->create_product($category_id, $text, $search_text);
             $db->update_user(['step' => 'add_product_info', 'page' => 'add', 'back' => $id]);
             exit();
         } elseif ($step == "add_product_info" and $text != "/start") {
@@ -137,10 +140,8 @@ if (!empty($updates)) {
             exit();
 
         } elseif ($step == "search_product" and $text != "/start") {
-            $tg->set_replyKeyboard($main_menu)
-                ->send_message("Bu funksiya hali ishlamayapti");
-            $db->update_user(['step' => 'menu']);
-        //    $giverent->search_product($text);
+            $text = clear_text_to_characters($text);
+           $giverent->search_product($text);
             exit();
         } elseif ($step == "add_product_photo" and $text != $db->get_text('ready_button', $lang)){
             $tg->send_message($db->get_text("send_product_photo", $lang));
@@ -344,7 +345,49 @@ if (!empty($updates)) {
         } elseif ($step == "choice_region") {
             # viloyat capital
             $profile->choice_region_redirect_menu($data);
+        
+        } elseif ($step == "search_product"){
+            // $tg->send_message()
+            if ($data == "back") {
+                $tg->delete_message()
+                ->set_replyKeyboard($main_menu)
+                    ->send_message($db->get_text('menu_text', $lang));
+                $db->update_user(['step' => 'menu']);
+                exit();
+            } elseif ($data == "bacck"){
+                $giverent->search_product($user_profile['back'], 0, "show", "backk");
+                exit();
+            } elseif ($data == "next") {
+                $total = $user_profile['total_count'];
+                $page = $user_profile['page'] + 4;
+                if ($page >= $total) {
+                    $tg->send_answer($db->get_text('next_page_not_found', $lang));
+                } else {
+                    $giverent->search_product($user_profile['back'], $page, "show", "backk");
+                    $db->update_user(['page' => $page]);
+                }
+                exit();
+            } elseif ($data == "prev") {
+                $page = $user_profile['page'];
+                if ($page <= 0) {
+                    $tg->send_answer($db->get_text('prev_page_not_found', $lang));
+                } else {
+                    $page -= 4;
+                    $giverent->search_product($user_profile['back'], $page, "show", "backk");
+                    $db->update_user(['page' => $page]);
+                }
+                exit();
+            } elseif ($data == "pagination_category") {
+                $text = $db->get_text('total_category', $lang);
+                $text = str_replace("{count}", $user_profile['total_count'], $text);
+                $tg->send_answer($text);
+                exit();
+            } else {
+                $giverent->show_product($data, 0, 'product', "bacck");
 
+                exit();
+            }
+        
         } elseif ($data == "phone_number") {
             $tg->delete_message()
                 ->request('sendmessage', [
@@ -454,7 +497,7 @@ if (!empty($updates)) {
         $text = "";
     }
 } else {
-    // $tg->set_webhook("https://4084-95-214-211-227.ngrok-free.app/hook.php");
+    $tg->set_webhook("https://1b14-37-110-214-225.ngrok-free.app/hook.php");
     echo "set webhook success";
     die();
 }

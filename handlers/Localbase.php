@@ -154,15 +154,16 @@ class Localbase
         return $data;
     }
 
-    public function create_product($category_id = 1, $title = "Демисезонная куртка Perfecto")
+    public function create_product($category_id = 1, $title = "Демисезонная куртка Perfecto", $search_text = "Демисезонная куртка Perfecto")
     {
         $user_id = $this->user['id'];
         $description = "none";
         $phone_number = "none";
-        $sql = "INSERT INTO `products` (`id`, `title`, `description`, `user_id`, `phone_number`, `category_id`, `create_at`) 
-          VALUES (NULL, :title, :description, :user_id, :phone_number, :category_id, CURRENT_TIMESTAMP);";
+        $sql = "INSERT INTO `products` (`id`, `title`, `search_title`, `description`, `user_id`, `phone_number`, `category_id`, `create_at`) 
+          VALUES (NULL, :title, :search_title, :description, :user_id, :phone_number, :category_id, CURRENT_TIMESTAMP);";
         $stmt = $this->db->prepare($sql);
         $stmt->bindParam(':title', $title);
+        $stmt->bindParam(':search_title', $search_text);
         $stmt->bindParam(':description', $description);
         $stmt->bindParam(':user_id', $user_id);
         $stmt->bindParam(':phone_number', $phone_number);

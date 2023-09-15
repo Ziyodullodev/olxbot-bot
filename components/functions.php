@@ -92,3 +92,10 @@ function send_product_photos($db, $product_id)
 
     return [$mediaItems, $text];
 }
+
+
+function clear_text_to_characters($text)
+{
+    $text = str_replace(['<', '>', '(', ')', '`', '*', '_', '[', ']', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!', '\'', '"', ':', ';', ','], '', $text);
+    return $text;
+}
