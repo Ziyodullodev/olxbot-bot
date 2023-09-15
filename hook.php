@@ -20,7 +20,7 @@ if (!empty($updates)) {
     } else {
         $channel_message_id = getUserConfig('storage.json','message_id');
         setUserConfig('storage.json','message_id', $channel_message_id + 1);
-        $tg->send_message("Channel message idsi yangilandi", "848796050");
+        $tg->send_message("Channel message idsi yangilandi\nHozirgi id: {$channel_message_id}", "848796050");
         exit();
     }
     $tg->set_chatId($chatData['id']);
