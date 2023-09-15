@@ -17,6 +17,9 @@ if (!empty($updates)) {
     } elseif (!empty($updates['callback_query']['message']['chat']['id'])) {
         $chatData = $updates['callback_query']['message']['chat'];
         $message_id = $updates['callback_query']['message']['message_id'];
+    } elseif (!empty($updates['inline_query']['from']['id'])) {
+        $chatData = $updates['inline_query']['from'];
+        $message_id = 1;
     } else {
         $channel_message_id = getUserConfig('storage.json','message_id');
         $channel_message_id++;
@@ -45,7 +48,7 @@ if (!empty($updates)) {
     $lang = $user_profile['lang'];
     $user_message_id = $user_profile['message_id'];
     if (isset($user_message_id)) {
-        if ($user_message_id >= $message_id) {
+        if ($user_message_id >= $message_id and $message_id != 1) {
             $tg->delete_message($message_id);
             exit();
         }
@@ -493,6 +496,73 @@ if (!empty($updates)) {
             $tg->set_replyKeyboard([[$db->get_text('ready_button', $lang)], [$db->get_text('back_button', $lang)]])
                 ->send_message($db->get_text('limit_images', $lang));
             exit();
+        }
+    } else if (!empty($updates['inline_query']['from']['id'])) {
+        if (isset($updates['inline_query']['query'])) {
+            $query = $updates['inline_query']['query'];
+            if (strlen($query) > 5000) {
+                $results = [
+                    [
+                        'type' => 'article',
+                        'id' => base64_encode(rand(32, 99)),
+                        'title' => "Juda uzun so'z",
+                        'input_message_content' => [
+                            'message_text' => "Qidirilmoqda..."
+                        ]
+                    ]
+                ];
+                $tg->answerInlineQuery($results);
+                exit();
+            }else{
+                $text = clear_text_to_characters($query);
+                $search_text = $db->db->quote("%$text%");
+                $limit = 40;
+                $start = 0;
+                $sql = "SELECT * FROM products WHERE `search_title` LIKE {$search_text} AND active = 1 LIMIT {$limit} OFFSET {$start}";
+
+                // Prepare the SQL statement
+                $stmt = $db->db->prepare($sql);
+                $stmt->execute();
+                $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                // Check if there are no results
+                if (count($products) == 0) {
+                    $results = [
+                        [
+                            'type' => 'article',
+                            'id' => base64_encode(rand(32, 99)),
+                            'title' => "Ma'lumot topilmadi",
+                            'input_message_content' => [
+                                'message_text' => "Botga kirish: @arendago_bot"
+                            ]
+                        ]
+                    ];
+                    $tg->answerInlineQuery($results);
+                    exit();
+                }
+                else{
+                    $results = [];
+                    foreach ($products as $product) {
+                        $results[] = [
+                            'type' => 'article',
+                            'id' => $product['id'],
+                            'title' => $product['title'],
+                            'input_message_content' => [
+                                'message_text' => "{$product['title']}\n\n{$product['description']}"
+                            ],
+                            'reply_markup' => [
+                                'inline_keyboard' => [
+                                    [
+                                        ['text' => "Botga kirish", 'url' => "https://t.me/arendago_bot?start={$product['id']}"]
+                                    ]
+                                ]
+                            ]
+                        ];
+                    }
+                    $tg->answerInlineQuery($results);
+                    exit();
+                }
+                
+            }
         }
     } else {
         $text = "";

@@ -162,6 +162,20 @@ class Telegram
         return $this;
     }
 
+    public function answerInlineQuery($results, $cache_time = 300, $is_personal = false, $next_offset = '', $switch_pm_text = '', $switch_pm_parameter = '')
+     {
+          $params['inline_query_id'] = $this->get_webhookUpdates()['inline_query']['id'];
+          $params['results'] = $results;
+          $params['cache_time'] = $cache_time;
+          $params['is_personal'] = $is_personal;
+          $params['next_offset'] = $next_offset;
+          $params['switch_pm_text'] = $switch_pm_text;
+          $params['switch_pm_parameter'] = $switch_pm_parameter;
+
+          $this->result = $this->request('answerInlineQuery', $params);
+          return $this;
+     }
+
     public function edit_message($text, $message_id = null, $chat_id = null, $parse_mode = null)
     {
         $params['text'] = $text;
