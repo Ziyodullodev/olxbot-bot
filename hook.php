@@ -43,6 +43,11 @@ if (!empty($updates)) {
         $profile->choice_city($name, true);
         exit();
     }
+    if (stripos($text, "/start ") === 0) {
+        $tg->set_replyKeyboard($main_menu)
+            ->send_message("tests");
+        exit();
+    }
 
     $step = $user_profile['step'];
     $lang = $user_profile['lang'];
@@ -53,6 +58,7 @@ if (!empty($updates)) {
             exit();
         }
     }
+
     $menus = $db->get_menu($lang);
     foreach ($menus as $menu) {
         $main_menu[] = [$menu['name']];
