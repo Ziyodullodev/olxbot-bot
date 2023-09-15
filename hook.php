@@ -44,8 +44,19 @@ if (!empty($updates)) {
         exit();
     }
     if (stripos($text, "/start ") === 0) {
-        $tg->set_replyKeyboard($main_menu)
-            ->send_message("tests");
+        $product_id = explode(" ", $text)[1];
+        $product = $db->get_product($product_id);
+        if ($product) {
+            $tg->send_message("{$product['title']}\n{$product['description']}\n{$product['phone_number']}");
+            $product_photos = send_product_photos($db, $product['id']);
+            if (!empty($product_photos[0])) {
+                //      // Send the media group
+                $tg->send_media_group($product_photos[0]);
+            } else {
+                $tg->send_message($product_photos[1]);
+            }
+            exit();
+        }
         exit();
     }
 
@@ -150,6 +161,10 @@ if (!empty($updates)) {
             exit();
 
         } elseif ($step == "search_product" and $text != "/start") {
+            if (strlen($text) < 3) {
+                $tg->send_message($db->get_text('search_error', $lang));
+                exit();
+            }
             $text = clear_text_to_characters($text);
            $giverent->search_product($text);
             exit();
@@ -513,13 +528,27 @@ if (!empty($updates)) {
                         'id' => base64_encode(rand(32, 99)),
                         'title' => "Juda uzun so'z",
                         'input_message_content' => [
-                            'message_text' => "Qidirilmoqda..."
+                            'message_text' => "Botga kirish: @arendago_bot"
                         ]
                     ]
                 ];
                 $tg->answerInlineQuery($results);
                 exit();
             }else{
+                if (strlen($query) < 3){
+                    $results = [
+                        [
+                            'type' => 'article',
+                            'id' => base64_encode(rand(32, 99)),
+                            'title' => "Kamida 3 ta belgidan ko'proq so'z kiriting",
+                            'input_message_content' => [
+                                'message_text' => "BOtga kirish: @arendago_bot"
+                            ]
+                        ]
+                    ];
+                    $tg->answerInlineQuery($results);
+                    exit();
+                }
                 $text = clear_text_to_characters($query);
                 $search_text = $db->db->quote("%$text%");
                 $limit = 40;
