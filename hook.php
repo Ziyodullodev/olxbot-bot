@@ -19,7 +19,8 @@ if (!empty($updates)) {
         $message_id = $updates['callback_query']['message']['message_id'];
     } else {
         $channel_message_id = getUserConfig('storage.json','message_id');
-        setUserConfig('storage.json','message_id', $channel_message_id + 1);
+        $channel_message_id++;
+        setUserConfig('storage.json','message_id', $channel_message_id);
         $tg->send_message("Channel message idsi yangilandi\nHozirgi id: {$channel_message_id}", "848796050");
         exit();
     }
@@ -497,7 +498,7 @@ if (!empty($updates)) {
         $text = "";
     }
 } else {
-    $tg->set_webhook("https://1b14-37-110-214-225.ngrok-free.app/hook.php");
+    // $tg->set_webhook("https://1b14-37-110-214-225.ngrok-free.app/hook.php");
     echo "set webhook success";
     die();
 }
