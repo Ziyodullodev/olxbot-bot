@@ -43,11 +43,14 @@ if (!empty($updates)) {
         $profile->choice_city($name, true);
         exit();
     }
+    $step = $user_profile['step'];
+    $lang = $user_profile['lang'] ?? "uz";
+
     if (stripos($updates['message']['text'], "/start ") === 0) {
         $product_id = explode(" ", $updates['message']['text'])[1];
         $product = $db->get_product($product_id);
         if ($product) {
-            $product_photos = send_product_photos($db, $product['id']);
+            $product_photos = send_product_photos($db, $product['id'], $lang);
             if (!empty($product_photos[0])) {
                 //      // Send the media group
                 $tg->send_media_group($product_photos[0]);
@@ -56,13 +59,11 @@ if (!empty($updates)) {
             }
             exit();
         } else {
-            $tg->send_message("Bunday Maxsulot topilmadi");
+            $tg->send_message($db->get_text('product_not_found', $lang));
         }
         exit();
     }
 
-    $step = $user_profile['step'];
-    $lang = $user_profile['lang'];
     $user_message_id = $user_profile['message_id'];
     if (isset($user_message_id)) {
         if ($user_message_id >= $message_id and $message_id != 1) {
@@ -117,7 +118,7 @@ if (!empty($updates)) {
                         ->send_message($db->get_text("thanks_for_our", $lang));
                     // sending moderator message new product
                     $product = $db->get_product($user_profile['back']);
-                    $product_photos = send_product_photos($db, $product['id']);
+                    $product_photos = send_product_photos($db, $product['id'], $lang);
                     if (!empty($product_photos[0])) {
                         //      // Send the media group
                         $tg->send_media_group($product_photos[0], $config['admin_id']);
@@ -467,7 +468,7 @@ if (!empty($updates)) {
             ->send_message($db->get_text("thanks_for_our", $lang));
         // sending moderator message new product
         $product = $db->get_product($user_profile['back']);
-        $product_photos = send_product_photos($db, $product['id']);
+        $product_photos = send_product_photos($db, $product['id'], $lang);
         if (!empty($product_photos[0])) {
             //      // Send the media group
             $tg->send_media_group($product_photos[0], $config['admin_id']);
@@ -522,14 +523,14 @@ if (!empty($updates)) {
     } else if (!empty($updates['inline_query']['from']['id'])) {
         if (isset($updates['inline_query']['query'])) {
             $query = $updates['inline_query']['query'];
-            if (strlen($query) > 5000) {
+            if (strlen($query) > 200) {
                 $results = [
                     [
                         'type' => 'article',
                         'id' => base64_encode(rand(32, 99)),
                         'title' => "Juda uzun so'z",
                         'input_message_content' => [
-                            'message_text' => "Botga kirish: @arendago_bot"
+                            'message_text' => $db->get_text('add_enter_bot', $lang)
                         ]
                     ]
                 ];
@@ -541,9 +542,9 @@ if (!empty($updates)) {
                         [
                             'type' => 'article',
                             'id' => base64_encode(rand(32, 99)),
-                            'title' => "Kamida 3 ta belgidan ko'proq so'z kiriting",
+                            'title' => $db->get_text('need_more_three', $lang),
                             'input_message_content' => [
-                                'message_text' => "BOtga kirish: @arendago_bot"
+                                'message_text' => $db->get_text('add_enter_bot', $lang)
                             ]
                         ]
                     ];
@@ -566,9 +567,9 @@ if (!empty($updates)) {
                         [
                             'type' => 'article',
                             'id' => base64_encode(rand(32, 99)),
-                            'title' => "Ma'lumot topilmadi",
+                            'title' => $db->get_text('product_not_found', $lang),
                             'input_message_content' => [
-                                'message_text' => "Botga kirish: @arendago_bot"
+                                'message_text' => $db->get_text('add_enter_bot', $lang)
                             ]
                         ]
                     ];
@@ -588,7 +589,7 @@ if (!empty($updates)) {
                             'reply_markup' => [
                                 'inline_keyboard' => [
                                     [
-                                        ['text' => "Botga kirish", 'url' => "https://t.me/arendago_bot?start={$product['id']}"]
+                                        ['text' => $db->get_text('see_more', $lang), 'url' => "https://t.me/arendago_bot?start={$product['id']}"]
                                     ]
                                 ]
                             ]

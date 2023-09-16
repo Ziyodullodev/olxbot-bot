@@ -46,7 +46,7 @@ function write_file( $path, $data, $mode = 'wb') {
 }
 
 
-function send_product_photos($db, $product_id)
+function send_product_photos($db, $product_id, $lang = "uz")
 {
     $stmt = $db->db->prepare("SELECT image_url as image FROM product_image WHERE product_id = :product_id");
     $stmt->bindParam(':product_id', $product_id, PDO::PARAM_INT);
@@ -64,7 +64,10 @@ function send_product_photos($db, $product_id)
 
     // Fetch all images and create media items
     $i = 0;
-    $text = "🛍 <b>" . $products['title'] . "</b>\n\n<i>" . $products['description'] . "</i>\n\n" . "📞 Telefon raqam: <b>" . $products['phone_number'] . "</b>\n\n" . "👤 Sotuvchi: <b>" . $products['name'] . "</b>\n\n" . "📦 Kategoriya: <b>" . $products['category_title'] . "</b>";
+    $text = "🛍 <b>" . $products['title'] . "</b>\n\n<i>" . $products['description'] . "</i>\n\n" . $db->get_text("product_phone_text", $lang)
+    ."<b>" . $products['phone_number'] . "</b>\n\n" . $db->get_text("product_name_text", $lang)
+    . "<b>" . $products['name'] . "</b>\n\n" . $db->get_text("product_category_text", $lang)
+    . "<b>" . $products['category_title'] . "</b>";
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         // Check if the 'image' column is not null
         if (!is_null($row['image'])) {
