@@ -218,11 +218,7 @@ if (!empty($updates)) {
             } elseif ($get_command['command'] == "change_lang") {
                 $profile->lang_keyboard();
             } elseif ($get_command['command'] == "change_location") {
-                $tg->send_message("Bu funksiya hali ishlamayapti");
-                exit();
-                $tg->set_replyKeyboard([], true)
-                    ->send_message(".")->delete_message($message_id + 1);
-                $profile->choice_city($name, false, true);
+                $profile->choice_city($name);
             } elseif ($get_command['command'] == "edit_profile") {
                 $tg->send_message("profileni tahrirlash");
             } elseif ($get_command['command'] = "search_product") {

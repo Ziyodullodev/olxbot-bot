@@ -57,7 +57,7 @@ class Profile
         }
         $this->tg
             ->set_inlineKeyboard($keys)
-            ->edit_message("Qaysi tuman yoki shahardansiz?");
+            ->edit_message($this->db->get_text("choice_region_text", $this->db->user['lang']));
 
         $this->db->update_user_location(['city_id' => $city_id]);
         $this->db->update_user(['step' => "choice_region"]);
@@ -72,7 +72,7 @@ class Profile
         }
         $this->tg->delete_message()
             ->set_replyKeyboard($menu)
-            ->send_message("Kerakli bolimni tanlang:");
+            ->send_message($this->db->get_text("menu_text", $this->db->user['lang']));
         $this->db->update_user(['step' => "menu"]);
         $this->db->update_user_location(['region_id' => $region_id]);
     }
