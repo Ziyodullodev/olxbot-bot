@@ -43,11 +43,10 @@ if (!empty($updates)) {
         $profile->choice_city($name, true);
         exit();
     }
-    if (stripos($text, "/start ") === 0) {
-        $product_id = explode(" ", $text)[1];
+    if (stripos($updates['message']['text'], "/start ") === 0) {
+        $product_id = explode(" ", $updates['message']['text'])[1];
         $product = $db->get_product($product_id);
         if ($product) {
-            $tg->send_message("{$product['title']}\n{$product['description']}\n{$product['phone_number']}");
             $product_photos = send_product_photos($db, $product['id']);
             if (!empty($product_photos[0])) {
                 //      // Send the media group
@@ -56,6 +55,8 @@ if (!empty($updates)) {
                 $tg->send_message($product_photos[1]);
             }
             exit();
+        } else {
+            $tg->send_message("Bunday Maxsulot topilmadi");
         }
         exit();
     }
