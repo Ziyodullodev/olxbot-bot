@@ -21,16 +21,16 @@ if (!empty($updates)) {
         $chatData = $updates['inline_query']['from'];
         $message_id = 1;
     } else {
-        $channel_message_id = getUserConfig('storage.json','message_id');
+        $channel_message_id = getUserConfig('storage.json', 'message_id');
         $channel_message_id++;
-        setUserConfig('storage.json','message_id', $channel_message_id);
+        setUserConfig('storage.json', 'message_id', $channel_message_id);
         $tg->send_message("Channel message idsi yangilandi\nHozirgi id: {$channel_message_id}", "848796050");
         exit();
     }
     $tg->set_chatId($chatData['id']);
     $chat_id = $chatData['id'];
     $name = $chatData['first_name'];
-    
+
     if ($chat_id == $config['arxiv_channel_id']) {
         $tg->send_message("Kanaldan xatolik", "848796050");
         exit();
@@ -46,7 +46,7 @@ if (!empty($updates)) {
     $step = $user_profile['step'];
     $lang = $user_profile['lang'] ?? "uz";
 
-    if (stripos($updates['message']['text'], "/start ") === 0) {
+    if (!empty($updates['message']['text']) and stripos($updates['message']['text'], "/start ") === 0) {
         $product_id = explode(" ", $updates['message']['text'])[1];
         $product = $db->get_product($product_id);
         if ($product) {
@@ -134,7 +134,7 @@ if (!empty($updates)) {
                             ]
                         ]
                     )
-                    ->send_message($text, $config['admin_id']);
+                        ->send_message($text, $config['admin_id']);
                     $db->update_user(['step' => 'menu']);
                     exit();
                 }
@@ -148,7 +148,7 @@ if (!empty($updates)) {
             } elseif ($text == "🇷🇺 Русский") {
                 $profile->change_lang('ru');
                 $lang = "ru";
-            }else{
+            } else {
                 $tg->send_message($db->get_text("change_lang_error", $lang));
                 exit();
             }
@@ -161,39 +161,108 @@ if (!empty($updates)) {
             $tg->set_replyKeyboard($main_menu)
                 ->send_message($db->get_text('change_lang_success', $lang));
             exit();
-
         } elseif ($step == "search_product" and $text != "/start") {
             if (strlen($text) < 3) {
                 $tg->send_message($db->get_text('search_error', $lang));
                 exit();
             }
             $text = clear_text_to_characters($text);
-           $giverent->search_product($text);
+            $giverent->search_product($text);
             exit();
-        } elseif ($step == "add_product_photo" and $text != $db->get_text('ready_button', $lang)){
+        } elseif ($step == "add_product_photo" and $text != $db->get_text('ready_button', $lang)) {
             $tg->send_message($db->get_text("send_product_photo", $lang));
             exit();
-        } elseif ($step == "my_products" and $text != "/start"){
-            // if ($text == "Sarlavha"){
-            //     $tg->send_message("Yangi sarlavha yuboring:");
-            //     exit();
-            // } elseif ($text == "Tavsif"){
-            //     $tg->send_message("Yangi tavsif yuboring:");
-            //     exit();
-            // } elseif ($text == "Rasm"){
-            //     $tg->send_message("Kategoriya");
-            //     exit();
-            // } elseif ($text == "Telefon raqam"){
-            //     $tg->send_message("Telefon raqam");
-            //     exit();
-            // } elseif ($text == "🔙 Orqaga"){
-                $tg->send_message("hozircha bu funksiya ishlamaydi");
+        } elseif ($step == "my_products") {
+            if ($text == "Sarlavha") {
+                $tg->send_message("Yangi sarlavha yuboring:");
+                $db->update_user(['step' => 'edit_product_title']);
+                exit();
+            } elseif ($text == "Tavsif") {
+                $tg->send_message("Yangi tavsif yuboring:");
+                $db->update_user(['step' => 'edit_product_description']);
+                exit();
+            } elseif ($text == "Rasm") {
+                $tg->send_message("rasm ozgartirish functioni");
+                exit();
+                // } elseif ($text == "Telefon raqam"){
+                //     $tg->send_message("Telefon raqam");
+                //     exit();
+            } elseif ($text == "🔙 Orqaga") {
                 $profile->my_products();
                 exit();
-            // } else {
-            //     $profile->show_profile();
-            //     exit();
-            // }
+            } else {
+                $tg->send_message("Bunday buyurtma yo'q");
+                exit();
+            }
+        } elseif ($step == "edit_product_title") {
+            if ($text == "🔙 Orqaga") {
+                $profile->my_products();
+                $db->update_user(['step' => 'my_products']);
+                exit();
+            } elseif ($text == "/start") {
+                $tg->set_replyKeyboard($main_menu)
+                    ->send_message($db->get_text('menu_text', $lang));
+                $db->update_user(['step' => 'menu']);
+                exit();
+            } else {
+                $db->update_product(['title' => $text, 'search_title' => clear_text_to_characters($text), 'active' => 0], $user_profile['back']);
+                $profile->my_products("Sarlavha o'zgartirish haqidagi xabaringiz moderatsiyaga yuborildi.");
+                $db->update_user(['step' => 'my_products']);
+                $product_id = $user_profile['back'];
+                $product_photos = send_product_photos($db, $product_id, $lang);
+                if (!empty($product_photos[0])) {
+                    //      // Send the media group
+                    $tg->send_media_group($product_photos[0], $config['admin_id']);
+                } else {
+                    $tg->send_message($product_photos[1], $config['admin_id']);
+                }
+                $text = "⬆️ Tepadagi elonni O'zgarishlarini tasdiqlang yoki rad eting: title o'zgarishi";
+                $tg->set_inlineKeyboard(
+                    [
+                        [
+                            ['text' => "✅ Tasdiqlash", 'callback_data' => "confirm_product-{$product_id}"],
+                            ['text' => "❌ Rad etish", 'callback_data' => "reject_product-{$product_id}"]
+                        ]
+                    ]
+                )
+                    ->send_message($text, $config['admin_id']);
+                exit();
+            }
+        } elseif ($step == "edit_product_description") {
+            if ($text == "🔙 Orqaga") {
+                $profile->my_products();
+                $db->update_user(['step' => 'my_products']);
+                exit();
+            } elseif ($text == "/start") {
+                $tg->set_replyKeyboard($main_menu)
+                    ->send_message($db->get_text('menu_text', $lang));
+                $db->update_user(['step' => 'menu']);
+                exit();
+            } else {
+                $db->update_product(['description' => $text, 'active' => 0], $user_profile['back']);
+                $profile->my_products("Tavsif o'zgartirish haqidagi xabaringiz moderatsiyaga yuborildi.");
+                $db->update_user(['step' => 'my_products']);
+                $product_id = $user_profile['back'];
+                $product_photos = send_product_photos($db, $product_id, $lang);
+                if (!empty($product_photos[0])) {
+                    //      // Send the media group
+                    $tg->send_media_group($product_photos[0], $config['admin_id']);
+                } else {
+                    $tg->send_message($product_photos[1], $config['admin_id']);
+                }
+                $text = "⬆️ Tepadagi elonni O'zgarishlarini tasdiqlang yoki rad eting: tavfsif o'zgarishi";
+                $tg->set_inlineKeyboard(
+                    [
+                        [
+                            ['text' => "✅ Tasdiqlash", 'callback_data' => "confirm_product-{$product_id}"],
+                            ['text' => "❌ Rad etish", 'callback_data' => "reject_product-{$product_id}"]
+                        ]
+                    ]
+                )
+                    ->send_message($text, $config['admin_id']);
+
+                exit();
+            }
         }
 
         if ($text == "/start" and $step != "start") {
@@ -243,24 +312,19 @@ if (!empty($updates)) {
                 error_log(json_encode($updates) . "\n\n\n\n\n");
                 error_log(json_encode($user_profile));
                 $tg->set_replyKeyboard([[$db->get_text('back_button', $lang)]])
-                ->send_message($db->get_text('search_text', $lang));
+                    ->send_message($db->get_text('search_text', $lang));
                 $db->update_user(['step' => 'search_product']);
             } elseif ($get_command['command'] == "my_products") {
                 $profile->my_products();
                 exit();
-            }
-            
-            else {
+            } else {
                 $tg->send_message($db->get_text('command_not_found', $lang));
             }
-            
         } else {
             $tg->set_replyKeyboard($main_menu)
                 ->send_message($db->get_text('menu_text', $lang));
-                $db->update_user(['step' => 'menu']);
+            $db->update_user(['step' => 'menu']);
         }
-    
-
     } elseif (!empty($updates['callback_query']['data'])) {
         $data = $updates['callback_query']['data'];
         if (stripos($data, "confirm_product") !== false) {
@@ -287,7 +351,7 @@ if (!empty($updates)) {
         }
         if ($step == "add_product_photo" or $step == "add_product_info" or $step == "add_product") {
             $tg->delete_message()
-            ->send_message($db->get_text('change_lang_error', $lang));
+                ->send_message($db->get_text('change_lang_error', $lang));
             exit();
         }
         if ($step == "start") {
@@ -398,16 +462,15 @@ if (!empty($updates)) {
         } elseif ($step == "choice_region") {
             # viloyat capital
             $profile->choice_region_redirect_menu($data);
-        
-        } elseif ($step == "search_product"){
+        } elseif ($step == "search_product") {
             // $tg->send_message()
             if ($data == "back") {
                 $tg->delete_message()
-                ->set_replyKeyboard($main_menu)
+                    ->set_replyKeyboard($main_menu)
                     ->send_message($db->get_text('menu_text', $lang));
                 $db->update_user(['step' => 'menu']);
                 exit();
-            } elseif ($data == "bacck"){
+            } elseif ($data == "bacck") {
                 $giverent->search_product($user_profile['back'], 0, "show", "backk");
                 exit();
             } elseif ($data == "next") {
@@ -440,8 +503,8 @@ if (!empty($updates)) {
 
                 exit();
             }
-        } elseif ($step == "my_products"){
-            if ($data == "back"){
+        } elseif ($step == "my_products") {
+            if ($data == "back") {
                 $profile->show_profile();
                 $db->update_user(['step' => 'menu']);
                 exit();
@@ -454,11 +517,11 @@ if (!empty($updates)) {
             } else {
                 $tg->send_message($product[1]);
             }
-            
+
             $tg->set_replyKeyboard($product_edit_keyboard)
                 ->send_message("{$data}-id dagi elonni tahrirlash");
+            $db->update_user(['back' => $data]);
             exit();
-        
         } elseif ($data == "phone_number") {
             $tg->delete_message()
                 ->request('sendmessage', [
@@ -494,9 +557,8 @@ if (!empty($updates)) {
             $tg->delete_message()
                 ->set_replyKeyboard($main_menu)
                 ->send_message($db->get_text('menu_text', $lang));
-                $db->update_user(['step' => 'menu']);
+            $db->update_user(['step' => 'menu']);
         }
-
     } elseif (!empty($updates['message']['contact'])) {
         if ($step != "phone_number") {
             $tg
@@ -555,11 +617,11 @@ if (!empty($updates)) {
                 exit();
             }
             $photo_url = end($updates['message']['photo']);
-            $channel_message_id = getUserConfig('storage.json','message_id');
+            $channel_message_id = getUserConfig('storage.json', 'message_id');
             $img_link = $config['channel_username'] . "/" . $channel_message_id;
-            $id = $db->create_img($product_id,$img_link, $photo_url['file_id']);
+            $id = $db->create_img($product_id, $img_link, $photo_url['file_id']);
             $tg->send_photo($photo_url['file_id'], "{$id}", $config['arxiv_channel_id']);
-            setUserConfig('storage.json','message_id', $channel_message_id + 1);
+            setUserConfig('storage.json', 'message_id', $channel_message_id + 1);
             $tg->set_replyKeyboard([[$db->get_text('ready_button', $lang)], [$db->get_text('back_button', $lang)]])
                 ->send_message($db->get_text('limit_images', $lang));
             exit();
@@ -580,8 +642,8 @@ if (!empty($updates)) {
                 ];
                 $tg->answerInlineQuery($results);
                 exit();
-            }else{
-                if (strlen($query) < 3){
+            } else {
+                if (strlen($query) < 3) {
                     $results = [
                         [
                             'type' => 'article',
@@ -619,8 +681,7 @@ if (!empty($updates)) {
                     ];
                     $tg->answerInlineQuery($results);
                     exit();
-                }
-                else{
+                } else {
                     $results = [];
                     foreach ($products as $product) {
                         $results[] = [
@@ -642,14 +703,13 @@ if (!empty($updates)) {
                     $tg->answerInlineQuery($results);
                     exit();
                 }
-                
             }
         }
     } else {
         $text = "";
     }
 } else {
-    $tg->set_webhook("https://4d4e-195-158-3-178.ngrok-free.app/hook.php");
+    $tg->set_webhook("https://ef80-195-158-3-178.ngrok-free.app/hook.php");
     echo "set webhook success";
     die();
 }

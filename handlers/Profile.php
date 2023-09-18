@@ -104,7 +104,7 @@ class Profile
             ->send_message("Tilni tanlang\nВыберите язык");
     }
 
-    public function my_products()
+    public function my_products($text = "Sizning mahsulotlaringiz")
     {
         $products = $this->db->db->query("SELECT pr.* FROM `products` as pr 
         LEFT JOIN users as us ON pr.user_id = us.id
@@ -118,7 +118,7 @@ class Profile
         $keys[floor($i / $c)][$i % $c] = ['text' => $this->db->get_text("back_button", $this->db->user['lang']), 'callback_data' => 'back'];
         
         $this->tg->set_inlineKeyboard($keys)
-            ->send_message("Sizning mahsulotlaringiz");
+            ->send_message($text);
         
         $this->db->update_user(['step' => 'my_products']);
     }
