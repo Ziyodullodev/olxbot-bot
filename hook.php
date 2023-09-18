@@ -179,6 +179,7 @@ if (!empty($updates)) {
 
             $tg->set_replyKeyboard($main_menu)
                 ->send_message($db->get_text('menu_text', $lang));
+            $db->update_user(['step' => 'menu']);
             exit();
         } elseif ($text == "/menu") {
             $tg
@@ -229,6 +230,7 @@ if (!empty($updates)) {
         } else {
             $tg->set_replyKeyboard($main_menu)
                 ->send_message($db->get_text('menu_text', $lang));
+                $db->update_user(['step' => 'menu']);
         }
 
     } elseif (!empty($updates['callback_query']['data'])) {
