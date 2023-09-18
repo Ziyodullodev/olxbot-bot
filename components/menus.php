@@ -238,3 +238,9 @@ $shaxarlar = [
         "Takhtakupir tumani" => "takhtakupir",
     ]
 ];
+
+$product_edit_keyboard = [
+    ['Sarlavha' , 'Tavsif'],
+    ['Rasm'],
+    ["🔙 Orqaga"]
+];

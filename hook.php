@@ -173,6 +173,27 @@ if (!empty($updates)) {
         } elseif ($step == "add_product_photo" and $text != $db->get_text('ready_button', $lang)){
             $tg->send_message($db->get_text("send_product_photo", $lang));
             exit();
+        } elseif ($step == "my_products" and $text != "/start"){
+            // if ($text == "Sarlavha"){
+            //     $tg->send_message("Yangi sarlavha yuboring:");
+            //     exit();
+            // } elseif ($text == "Tavsif"){
+            //     $tg->send_message("Yangi tavsif yuboring:");
+            //     exit();
+            // } elseif ($text == "Rasm"){
+            //     $tg->send_message("Kategoriya");
+            //     exit();
+            // } elseif ($text == "Telefon raqam"){
+            //     $tg->send_message("Telefon raqam");
+            //     exit();
+            // } elseif ($text == "🔙 Orqaga"){
+                $tg->send_message("hozircha bu funksiya ishlamaydi");
+                $profile->my_products();
+                exit();
+            // } else {
+            //     $profile->show_profile();
+            //     exit();
+            }
         }
 
         if ($text == "/start" and $step != "start") {
@@ -181,10 +202,6 @@ if (!empty($updates)) {
                 ->send_message($db->get_text('menu_text', $lang));
             $db->update_user(['step' => 'menu']);
             exit();
-        } elseif ($text == "/menu") {
-            $tg
-                ->set_replyKeyboard($main_menu)
-                ->send_message($db->get_text('menu_text', $lang));
         }
         $get_command = $db->get_command_by_menu_name($text, $lang);
         if ($get_command) {
@@ -222,16 +239,27 @@ if (!empty($updates)) {
                 $profile->choice_city($name);
             } elseif ($get_command['command'] == "edit_profile") {
                 $tg->send_message("profileni tahrirlash");
-            } elseif ($get_command['command'] = "search_product") {
+            } elseif ($get_command['command'] == "search_product") {
+                error_log(json_encode($updates) . "\n\n\n\n\n");
+                error_log(json_encode($user_profile));
                 $tg->set_replyKeyboard([[$db->get_text('back_button', $lang)]])
                 ->send_message($db->get_text('search_text', $lang));
                 $db->update_user(['step' => 'search_product']);
+            } elseif ($get_command['command'] == "my_products") {
+                $profile->my_products();
+                exit();
             }
+            
+            else {
+                $tg->send_message($db->get_text('command_not_found', $lang));
+            }
+            
         } else {
             $tg->set_replyKeyboard($main_menu)
                 ->send_message($db->get_text('menu_text', $lang));
                 $db->update_user(['step' => 'menu']);
         }
+    
 
     } elseif (!empty($updates['callback_query']['data'])) {
         $data = $updates['callback_query']['data'];
@@ -412,6 +440,24 @@ if (!empty($updates)) {
 
                 exit();
             }
+        } elseif ($step == "my_products"){
+            if ($data == "back"){
+                $profile->show_profile();
+                $db->update_user(['step' => 'menu']);
+                exit();
+            }
+            $tg->delete_message();
+            $product = send_product_photos($db, $data, $lang);
+            if (!empty($product[0])) {
+                //      // Send the media group
+                $tg->send_media_group($product[0]);
+            } else {
+                $tg->send_message($product[1]);
+            }
+            
+            $tg->set_replyKeyboard($product_edit_keyboard)
+                ->send_message("{$data}-id dagi elonni tahrirlash");
+            exit();
         
         } elseif ($data == "phone_number") {
             $tg->delete_message()
@@ -603,7 +649,7 @@ if (!empty($updates)) {
         $text = "";
     }
 } else {
-    // $tg->set_webhook("https://1b14-37-110-214-225.ngrok-free.app/hook.php");
+    $tg->set_webhook("https://4d4e-195-158-3-178.ngrok-free.app/hook.php");
     echo "set webhook success";
     die();
 }

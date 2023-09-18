@@ -237,7 +237,6 @@ class Localbase
         return $data;
     }
 
-
     public function get_user_chat_id($user_id)
     {
         $stmt = $this->db->query("SELECT `chat_id` FROM `users` WHERE `id` = '{$user_id}'");
@@ -249,6 +248,13 @@ class Localbase
     {
         $stmt = $this->db->query("SELECT name_{$lang} as name FROM `menu` WHERE `command` = '{$command}'");
         $data = $stmt->fetch(PDO::FETCH_ASSOC)['name'];
+        return $data;
+    }
+
+    public function get_product_img($product_id)
+    {
+        $stmt = $this->db->query("SELECT * FROM `product_image` WHERE `product_id` = '{$product_id}'");
+        $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
         return $data;
     }
 }

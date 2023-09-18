@@ -81,7 +81,7 @@ class Profile
     public function show_profile()
     {
         $user = $this->db->user;
-        $keyboard = $this->db->db->query("SELECT * FROM `menu` WHERE `type` = 'profile_menu'")->fetchAll(PDO::FETCH_ASSOC);
+        $keyboard = $this->db->db->query("SELECT * FROM `menu` WHERE `type` = 'profile_menu' ORDER BY `location` ASC")->fetchAll(PDO::FETCH_ASSOC);
         $keys = [];
         foreach ($keyboard as $key => $value) {
             $keys[] = [$value['name_'. $user['lang']]];
@@ -104,5 +104,23 @@ class Profile
             ->send_message("Tilni tanlang\nВыберите язык");
     }
 
+    public function my_products()
+    {
+        $products = $this->db->db->query("SELECT pr.* FROM `products` as pr 
+        LEFT JOIN users as us ON pr.user_id = us.id
+        WHERE us.id = '{$this->db->user['id']}'")->fetchAll(PDO::FETCH_ASSOC);
+        $i = 0;
+        $c = 2;
+        foreach ($products as $key => $value) {
+            $keys[floor($i / $c)][$i % $c] = ['text' => $value['title'], 'callback_data' => $value['id']];
+            $i++;
+        }
+        $keys[floor($i / $c)][$i % $c] = ['text' => $this->db->get_text("back_button", $this->db->user['lang']), 'callback_data' => 'back'];
+        
+        $this->tg->set_inlineKeyboard($keys)
+            ->send_message("Sizning mahsulotlaringiz");
+        
+        $this->db->update_user(['step' => 'my_products']);
+    }
 
 }
