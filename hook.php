@@ -193,7 +193,7 @@ if (!empty($updates)) {
             // } else {
             //     $profile->show_profile();
             //     exit();
-            }
+            // }
         }
 
         if ($text == "/start" and $step != "start") {
