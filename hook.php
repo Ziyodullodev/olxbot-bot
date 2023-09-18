@@ -191,9 +191,6 @@ if (!empty($updates)) {
             } elseif ($text == "🔙 Orqaga") {
                 $profile->my_products();
                 exit();
-            } else {
-                $tg->send_message("Bunday buyurtma yo'q");
-                exit();
             }
         } elseif ($step == "edit_product_title") {
             if ($text == "🔙 Orqaga") {

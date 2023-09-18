@@ -108,7 +108,7 @@ class Profile
     {
         $products = $this->db->db->query("SELECT pr.* FROM `products` as pr 
         LEFT JOIN users as us ON pr.user_id = us.id
-        WHERE us.id = '{$this->db->user['id']}'")->fetchAll(PDO::FETCH_ASSOC);
+        WHERE us.id = '{$this->db->user['id']}' and pr.active = 1")->fetchAll(PDO::FETCH_ASSOC);
         $i = 0;
         $c = 2;
         foreach ($products as $key => $value) {
