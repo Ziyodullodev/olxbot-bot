@@ -174,11 +174,12 @@ if (!empty($updates)) {
             exit();
         } elseif ($step == "my_products") {
             if ($text == "Sarlavha") {
-                $tg->send_message("Yangi sarlavha yuboring:");
+                $tg->set_replyKeyboard([[$db->get_text('back_button', $lang)]])
+                ->send_message("Yangi sarlavha yuboring:");
                 $db->update_user(['step' => 'edit_product_title']);
                 exit();
             } elseif ($text == "Tavsif") {
-                $tg->send_message("Yangi tavsif yuboring:");
+                $tg->set_replyKeyboard([[$db->get_text('back_button', $lang)]])->send_message("Yangi tavsif yuboring:");
                 $db->update_user(['step' => 'edit_product_description']);
                 exit();
             } elseif ($text == "Rasm") {
