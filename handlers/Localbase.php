@@ -251,11 +251,31 @@ class Localbase
         return $data;
     }
 
-    public function get_product_img($product_id)
-    {
-        $stmt = $this->db->query("SELECT * FROM `product_image` WHERE `product_id` = '{$product_id}'");
-        $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        return $data;
-    }
+    function get_product_image($id, $page)
+     {
+          if ($page < 0) {
+               $data = $this->db->query("SELECT * FROM `product_image` WHERE `product_id` = '{$id}' ORDER BY `id` DESC LIMIT 1")->fetch(PDO::FETCH_ASSOC);
+               $count = $this->db->query("SELECT COUNT(id) as count FROM `product_image` WHERE `product_id` = '{$id}'")->fetch(PDO::FETCH_ASSOC)['count'];
+               return [$data, $count - 1];
+          }
+          $data = $this->db->query("SELECT * FROM `product_image` WHERE `product_id` = '{$id}' LIMIT 1 OFFSET " . $page)->fetch(PDO::FETCH_ASSOC);
+          if (!$data) {
+               // SELECT * FROM `products` WHERE active = 1 ORDER BY `id` DESC LIMIT 1
+               $data = $this->db->query("SELECT * FROM `product_image` WHERE `product_id` = '{$id}' ORDER BY `id` ASC LIMIT 1")->fetch(PDO::FETCH_ASSOC);
+               return [$data, 0];
+          }
+          return [$data, $page];
+     }
+
+     function delete_product_img($id)
+     {
+          $this->db->query("DELETE FROM `product_image` WHERE `id` = '{$id}'");
+     }
+
+     function delete_product_and_image($product_id)
+     {
+          $this->db->query("DELETE FROM `product_image` WHERE `product_id` = '{$product_id}'");
+          $this->db->query("DELETE FROM `products` WHERE `id` = '{$product_id}'");
+     }
 }
 

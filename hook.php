@@ -45,7 +45,7 @@ if (!empty($updates)) {
     }
     $step = $user_profile['step'];
     $lang = $user_profile['lang'] ?? "uz";
-
+    
     if (!empty($updates['message']['text']) and stripos($updates['message']['text'], "/start ") === 0) {
         $product_id = explode(" ", $updates['message']['text'])[1];
         $product = $db->get_product($product_id);
@@ -182,12 +182,25 @@ if (!empty($updates)) {
                 $tg->set_replyKeyboard([[$db->get_text('back_button', $lang)]])->send_message("Yangi tavsif yuboring:");
                 $db->update_user(['step' => 'edit_product_description']);
                 exit();
-            } elseif ($text == "✏️ Rasm") {
-                $tg->send_message("rasm ozgartirish functioni");
+            // } elseif ($text == "✏️ Rasm") {
+            //     $pr_image = get_product_image($user_profile['back']);
+            //     if (!$pr_image){
+            //         $tg->set_replyKeyboard([["➕ Rasm qo'shish"],[$db->get_text('back_button', $lang)]])
+            //         ->send_message("Rasm topilmadi");
+            //         exit();
+            //     }
+            //     $tg->send_photo($pr_image, "Rasmni o'zgartirish yoki o'chirib tashlashingiz mumkin.");
+            //     $db->update_user(['step' => 'edit_product_photo']);
+                // exit();
+            } elseif ($text == "❌ O'chirish"){
+                $db->delete_product_and_img($user_profile['back']);
+                $tg->set_replyKeyboard($main_menu)
+                ->send_message("Elon o'chirildi.");
+                $db->update_user(['step' => 'menu']);
                 exit();
-                // } elseif ($text == "Telefon raqam"){
-                //     $tg->send_message("Telefon raqam");
-                //     exit();
+            // } elseif ($text == "➕ Rasm qo'shish"){
+            //     $tg->send_message("Rasm qo'shish functioni.");
+            //     exit();
             } elseif ($text == "🔙 Orqaga") {
                 $profile->my_products();
                 exit();
@@ -261,6 +274,10 @@ if (!empty($updates)) {
 
                 exit();
             }
+        } elseif ($step == "edit_product_photo"){
+            $tg->set_replyKeyboard([[$db->get_text('back_button', $lang)]])->send_message($db->get_text("menu_text", $lang));
+            $db->update_user(['step' => 'menu']);
+            exit();
         }
 
         if ($text == "/start" and $step != "start") {
@@ -520,6 +537,34 @@ if (!empty($updates)) {
                 ->send_message("{$data}-id dagi elonni tahrirlash");
             $db->update_user(['back' => $data]);
             exit();
+        // } elseif ($step == "edit_product_photo"){
+            // $action = explode("-", $data);
+            // $tg->send_message(json_encode($action));
+            // exit();
+            // if ($action[0] == "delete"){
+            //     $db->delete_product_img($action[1]);
+            //     $tg->delete_message();
+            //     $product = get_product_image($user_profile['back']);
+            //     if (empty($product) or $product === false){
+            //         $profile->my_products("Eloningizda rasm qolmadi.");
+            //         exit();
+            //     }
+            //     $tg->send_photo($product, "Rasm o'chirildi");
+            //     exit();
+            // } elseif ($action[1] == "edit"){
+            //     $tg->delete_message();
+            //     $tg->set_replyKeyboard($db->get_text("back_button", $lang))
+            //         ->send_message("Yangi rasm yuboring:");
+            //     exit();
+            // } elseif ($action[1] == "next"){
+            //     $image = get_product_image($user_profile['back'], $action[1]);
+            //     $tg->edit_photo($image);
+            //     exit();
+            // } elseif ($action[1] == "old"){
+            //     $image = get_product_image($user_profile['back'], $action[1]);
+            //     $tg->edit_photo($image);
+            //     exit();
+            // }
         } elseif ($data == "phone_number") {
             $tg->delete_message()
                 ->request('sendmessage', [
@@ -704,10 +749,11 @@ if (!empty($updates)) {
             }
         }
     } else {
-        $text = "";
+        $tg->send_message("Nomalum buyuruq");
+        exit();
     }
 } else {
-    $tg->set_webhook("https://ef80-195-158-3-178.ngrok-free.app/hook.php");
+    $tg->set_webhook("https://3912-195-158-3-178.ngrok-free.app/hook.php");
     echo "set webhook success";
     die();
 }

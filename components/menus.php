@@ -241,6 +241,6 @@ $shaxarlar = [
 
 $product_edit_keyboard = [
     ['✏️ Sarlavha' , '✏️ Tavsif'],
-    ['✏️ Rasm'],
-    ["🔙 Orqaga"]
+    ['❌ O\'chirish'],
+    ['🔙 Orqaga']
 ];
